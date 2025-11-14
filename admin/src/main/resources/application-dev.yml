@@ -1,0 +1,53 @@
+server:
+  port: 8444
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-password: ENC(Y6NgbbcggJp06p9ZnpSSAQ==)
+    key-store-type: PKCS12
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+spring:
+  messages:
+    basename: message
+    encoding: utf-8
+    cache-duration: 10
+    fallback-to-system-locale: false
+  config:
+    import: optional:file:.env[.properties]
+  mvc:
+    view:
+      prefix: /views/
+      suffix: .jsp
+  ai:
+    vectorstore:
+      pgvector:
+        initialize-schema: true
+        dimensions: 1536   # OpenAI text-embedding-3-small 기준
+    openai:
+      api-key: ENC(+T9SWaH75QZqZr5jsSY/GPfYhyJSiku54nYHGBHzq2D8M6Ri7sq3QXgWNzqalZw1kxI4ewSWJ5sbOH0zCQt6418r05/ShuliVIYKCWLIZtjMAOwzahzqKH+vtkWOlu2v5C3XBYdZYl2/14oOWDyR6yjYFNOTyCBOpxAEphIYS2SVMLqr6rTbFFN1RpBFs4Iko7C3Lmx1PdzADzBqyCezj4u+2PCSYN4ChZKtLrY7QnI=)
+      chat:
+        options:
+          model: gpt-4o
+          temperature: 0.1
+          max-tokens: 1000
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: ENC(Y6NgbbcggJp06p9ZnpSSAQ==)
+mybatis:
+  type-aliases-package: edu.sm.app.dto
+  mapper-locations: classpath:/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+logging:
+  level:
+    root: info
+
+app:
+  dir:
+  key:
+    algo: PBEWithMD5AndDES
+    skey: ${MY_KEY}
