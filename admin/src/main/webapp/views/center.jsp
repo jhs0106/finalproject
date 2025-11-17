@@ -4,7 +4,7 @@
   <div class="main-container">
     <div class="xs-pd-20-10 pd-ltr-20">
       <div class="title pb-20">
-        <h2 class="h3 mb-0">Hospital Overview</h2>
+        <h2 class="h3 mb-0">시설 요약 확인</h2>
       </div>
 
       <div class="row pb-10">
@@ -13,7 +13,7 @@
             <div
                     class="d-flex flex-wrap justify-content-between align-items-center pb-0 pb-md-3"
             >
-              <div class="h5 mb-md-0">Hospital Activities</div>
+              <div class="h5 mb-md-0">사용자 방문</div>
               <div class="form-group mb-md-0">
                 <select class="form-control form-control-sm selectpicker">
                   <option value="">Last Week</option>
@@ -43,8 +43,8 @@
             </div>
             <div class="d-flex justify-content-between align-items-end">
               <div class="text-white">
-                <div class="font-14">Appointment</div>
-                <div class="font-24 weight-500">1865</div>
+                <div class="font-14">온도</div>
+                <div class="font-24 weight-500">32.1</div>
               </div>
               <div class="max-width-150">
                 <div id="appointment-chart"></div>
@@ -63,8 +63,8 @@
             </div>
             <div class="d-flex justify-content-between align-items-end">
               <div class="text-white">
-                <div class="font-14">Surgery</div>
-                <div class="font-24 weight-500">250</div>
+                <div class="font-14">습도</div>
+                <div class="font-24 weight-500">55%</div>
               </div>
               <div class="max-width-150">
                 <div id="surgery-chart"></div>
@@ -78,7 +78,7 @@
         <div class="col-lg-4 col-md-6 mb-20">
           <div class="card-box height-100-p pd-20 min-height-200px">
             <div class="d-flex justify-content-between pb-10">
-              <div class="h5 mb-0">Anything</div>
+              <div class="h5 mb-0">고객</div>
               <div class="dropdown">
                 <a
                         class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
@@ -233,7 +233,7 @@
         <div class="col-lg-4 col-md-6 mb-20">
           <div class="card-box height-100-p pd-20 min-height-200px">
             <div class="d-flex justify-content-between">
-              <div class="h5 mb-0">Diseases Report</div>
+              <div class="h5 mb-0">고객 방문 지수</div>
               <div class="dropdown">
                 <a
                         class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"

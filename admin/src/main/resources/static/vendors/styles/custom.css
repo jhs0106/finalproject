@@ -4,17 +4,13 @@ body.sidebar-light .left-side-bar,
 .left-side-bar {
     background: linear-gradient(
             180deg,
-            #006b6f 0%,   /* 위쪽 – 조금 더 밝은 청록 */
-            #005359 40%,  /* 중간 */
-            #00353b 100%  /* 아래 – 진한 청록/청록남색 느낌 */
+            #283d70 0%,   /* 위쪽 - 기준 색 */
+            #182442 40%,  /* 중간 - 살짝만 어둡게 */
+            #0F172AFF 100%  /* 아래 - 너무 어둡지 않은 딥 청록 */
     ) !important;
-    background-image: linear-gradient(
-            180deg,
-            #006b6f 0%,
-            #005359 40%,
-            #00353b 100%
-    ) !important; /* 혹시 다른 background-image 있으면 덮기 */
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.25); /* 오른쪽에 살짝 그림자 */
+
+    /* 굳이 background-image 두 번 줄 필요 없어서 정리 */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.25);
 }
 
 
@@ -50,4 +46,13 @@ body.sidebar-light .left-side-bar,
 
 .sidebar-small-cap {
     color: #a1a1a1 !important;
+}
+
+.left-side-bar .sidebar-logo {
+    display: block;
+    width: 80px;       /* 기존 120px → 80px 로 축소 (약 2/3 크기) */
+    max-width: 60%;    /* 사이드바 폭 기준에서도 조금 더 작게 */
+    height: auto;
+    margin: 12px auto 10px;  /* 위·아래 여백도 살짝 줄이기 */
+    object-fit: contain;
 }
