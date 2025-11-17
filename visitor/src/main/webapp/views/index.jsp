@@ -130,6 +130,60 @@
         </div>
     </div>
 </footer>
+<!-- Epidemic Info Modal -->
+<div class="modal fade" id="epidemicModal" tabindex="-1"
+     role="dialog" aria-labelledby="epidemicModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+
+            <!-- 제목 -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="epidemicModalLabel">전염병 알림 및 안내</h5>
+            </div>
+
+            <!-- 본문 -->
+            <div class="modal-body">
+                <h6 class="mb-2">
+                    현재 위험 단계 :
+                    <span class="badge badge-danger">경계</span>
+                </h6>
+
+                <p class="mb-2">
+                    ○○지역 전염병 의심 사례가 증가하고 있습니다.<br>
+                    손 씻기, 마스크 착용 등 기본 예방 수칙을 지켜주세요.
+                </p>
+
+                <ul class="mb-2">
+                    <li>발열 · 기침 · 인후통이 있을 경우 방문 전 문의 필수</li>
+                    <li>방문 시 마스크 착용 및 손 소독 필수</li>
+                    <li>최근 14일 이내 해외 방문 시 안내 데스크 고지</li>
+                </ul>
+
+                <small class="text-muted">
+                    ※ 정보는 질병관리청 및 지자체 공지를 기반으로 제공됩니다.
+                </small>
+            </div>
+
+            <!-- 푸터 (왼쪽 체크박스 + 오른쪽 닫기 버튼) -->
+            <div class="modal-footer d-flex justify-content-between align-items-center">
+
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="hideEpidemicToday">
+                    <label class="custom-control-label" for="hideEpidemicToday">
+                        오늘 하루 보지 않기
+                    </label>
+                </div>
+
+                <button type="button"
+                        class="btn btn-link text-muted font-weight-bold epidemic-close-btn"
+                        data-dismiss="modal">
+                    ×
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 <!-- JS: jQuery -> Popper -> Bootstrap -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -149,6 +203,72 @@
                 header.classList.remove('scrolled');
             }
         });
+    })();
+</script>
+
+<!-- Epidemic Popup Control Script -->
+<script>
+    (function () {
+
+        var STORAGE_KEY = 'epidemicHideUntil';      // 오늘 하루 보지 않기
+        var CLICK_KEY   = 'epidemicCardClicked';    // 카드 클릭 여부
+
+        // 자동 팝업을 띄워도 되는지 판단
+        function shouldShowEpidemicModal() {
+
+            // 1) 카드 클릭으로 모달이 열린 경우 → 자동 팝업 방지
+            if (localStorage.getItem(CLICK_KEY) === 'true') {
+                localStorage.removeItem(CLICK_KEY);
+                return false;
+            }
+
+            // 2) 오늘 하루 보지 않기 체크 여부 확인
+            var stored = localStorage.getItem(STORAGE_KEY);
+            if (!stored) return true;
+
+            var hideUntil = new Date(stored);
+            var now = new Date();
+
+            // hideUntil이 지났으면 다시 팝업 띄움
+            return now > hideUntil;
+        }
+
+        // 오늘 하루 보지 않기 저장 (내일 0시까지)
+        function hideEpidemicForToday() {
+            var now = new Date();
+            var tomorrow = new Date(
+                    now.getFullYear(),
+                    now.getMonth(),
+                    now.getDate() + 1,
+                    0, 0, 0, 0
+            );
+
+            localStorage.setItem(STORAGE_KEY, tomorrow.toISOString());
+        }
+
+        $(function () {
+
+            // ★ 카드 클릭인 경우(모달 직접 열기) 자동 팝업 막기
+            $('.epidemic-card').on('click', function () {
+                localStorage.setItem(CLICK_KEY, 'true');
+            });
+
+            // ★ 홈(index + center.jsp 결합) 첫 진입 시 자동 팝업
+            if (shouldShowEpidemicModal()) {
+                $('#epidemicModal').modal('show');
+            }
+
+            // ★ 모달 닫힐 때 오늘 하루 보지 않기 체크한 경우 저장
+            $('#epidemicModal').on('hidden.bs.modal', function () {
+                if ($('#hideEpidemicToday').is(':checked')) {
+                    hideEpidemicForToday();
+                }
+
+                // 다음 열림을 위해 체크박스 초기화
+                $('#hideEpidemicToday').prop('checked', false);
+            });
+        });
+
     })();
 </script>
 
