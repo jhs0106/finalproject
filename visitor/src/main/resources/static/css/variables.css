@@ -1,48 +1,52 @@
 /* ============================================
-   AI 문화시설 관람 도우미 - Design System v2
-   컨셉: 모던 미니멀 90% + 한국 문화 포인트 10%
-   키워드: 깔끔한 화이트, 선명한 틸, 은은한 전통
+   AI 문화시설 관람 도우미 - Design System v2.1
+   컨셉: 모던 미니멀 90% + 한국 전통 색감 10%
    ============================================ */
 
 :root {
-    /* ========== 배경 색상 (모던 화이트) ========== */
-    --bg-main: #ffffff;              /* 순백 */
-    --bg-card: #fafafa;              /* 연한 그레이 카드 */
-    --bg-overlay: #f8f9fa;           /* 오버레이 */
-    --bg-section: #fafafa;           /* 섹션 배경 */
-    --bg-hover: #f5f5f5;             /* 호버 배경 */
+    /* ========== 배경 색상 (한지 + 모던 화이트) ========== */
+    --bg-main: #f9fafb;              /* 기본 배경 (아주 옅은 회백색, 한지 느낌) */
+    --bg-card: #fdfbf7;              /* 카드/패널 배경 (따뜻한 크림) */
+    --bg-overlay: #f5f5f0;           /* 오버레이/모달 배경 */
+    --bg-section: #f7f5ef;           /* 섹션 배경 (연한 베이지 톤) */
+    --bg-hover: #f1f0ea;             /* 카드/버튼 호버 배경 */
 
-    /* ========== 메인 포인트 (모던 틸/사이언) ========== */
-    --primary-dark: #0f172a;         /* 딥 네이비 */
-    --primary-medium: #1e293b;       /* 미디엄 네이비 */
-    --primary-teal: #06b6d4;         /* 밝은 사이언 (메인) ✨ */
-    --primary-light: #22d3ee;        /* 라이트 사이언 (호버) */
-    --primary-lighter: #67e8f9;      /* 매우 밝은 사이언 */
+    /* ========== 메인 포인트 (청록 + 먹색) ========== */
+    --primary-dark: #111827;         /* 먹색에 가까운 딥 네이비 */
+    --primary-medium: #1f2937;       /* 미디엄 네이비/먹색 */
+    --primary-teal: #0fadb0;         /* 청록 (청자기/비취 느낌 메인 포인트) */
+    --primary-light: #22c7c9;        /* 청록 라이트 (호버) */
+    --primary-lighter: #a5f3fc;      /* 아주 연한 청록 (배경/배지) */
 
-    /* ========== 서브 포인트 (한국 문화 10%) ========== */
-    --accent-gold: #d4af37;          /* 골드 (전통 포인트) */
-    --accent-beige: #e8dcc4;         /* 은은한 베이지 (배지용) */
-    --accent-beige-dark: #d4c4a8;    /* 진한 베이지 */
-    --accent-warm: #fef3e2;          /* 따뜻한 크림 (강조 배경) */
+    /* ========== 서브 포인트 (한국 전통 컬러) ========== */
+    --accent-gold: #cfa64a;          /* 톤 다운된 전통 금색 */
+    --accent-beige: #e9ddc8;         /* 한지 베이지 */
+    --accent-beige-dark: #c9b08a;    /* 목재 기둥 느낌 베이지/브라운 */
+    --accent-warm: #fdf3e3;          /* 따뜻한 크림 (강조 섹션 배경) */
 
-    /* ========== 강조 색상 ========== */
+    /* 단청 계열 포인트 컬러 (선택적으로 사용) */
+    --accent-dancheong-red: #c0392b;   /* 단청 붉은색 (강조 버튼/포인트 텍스트) */
+    --accent-dancheong-blue: #255e91;  /* 단청 청색 (탭/링크 포커스) */
+    --accent-dancheong-green: #2e7d5b; /* 단청 녹색 (테두리/뱃지) */
+
+    /* ========== 강조 색상 (알림/상태) ========== */
     --alert-success: #10b981;        /* 성공 (그린) */
     --alert-warning: #f59e0b;        /* 경고 (오렌지) */
     --alert-danger: #ef4444;         /* 위험 (레드) */
-    --alert-info: #06b6d4;           /* 정보 (틸) */
+    --alert-info: #0fadb0;           /* 정보 (청록 메인과 통일) */
 
     /* ========== 텍스트 색상 ========== */
-    --text-primary: #0f172a;         /* 주 텍스트 */
-    --text-secondary: #64748b;       /* 부 텍스트 */
-    --text-tertiary: #94a3b8;        /* 보조 텍스트 */
+    --text-primary: #111827;         /* 기본 본문 텍스트 (먹색) */
+    --text-secondary: #4b5563;       /* 부 텍스트 (차분한 회색) */
+    --text-tertiary: #9ca3af;        /* 보조 텍스트 */
     --text-white: #ffffff;           /* 흰색 텍스트 */
-    --text-muted: #cbd5e1;           /* 흐린 텍스트 */
+    --text-muted: #d1d5db;           /* 흐린 텍스트/비활성 */
 
     /* ========== 보더/라인 ========== */
-    --border-light: #e2e8f0;         /* 얇은 라인 */
-    --border-medium: #cbd5e1;        /* 중간 라인 */
-    --border-dark: #94a3b8;          /* 진한 라인 */
-    --border-gold: #d4af37;          /* 골드 라인 (전통 포인트) */
+    --border-light: #e5e7eb;         /* 얇은 라인 */
+    --border-medium: #d4d4d8;        /* 중간 라인 */
+    --border-dark: #9ca3af;          /* 진한 라인 */
+    --border-gold: #cfa64a;          /* 전통 포인트용 골드 테두리 */
 
     /* ========== 타이포그래피 ========== */
     /* 폰트 패밀리 */
@@ -108,7 +112,7 @@
     --narrow-width: 768px;           /* 좁은 너비 */
     --wide-width: 1440px;            /* 넓은 너비 */
 
-    /* 헤더 */
+    /* 헤더 높이 */
     --header-height: 72px;           /* 데스크톱 */
     --header-height-mobile: 64px;    /* 모바일 */
 
@@ -122,16 +126,16 @@
     --radius-full: 9999px;           /* 완전 둥글게 */
 
     /* ========== 그림자 (은은하게) ========== */
-    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
     --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.06);
     --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
-    --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.1);
-    --shadow-xl: 0 16px 48px rgba(15, 23, 42, 0.12);
-    --shadow-2xl: 0 24px 64px rgba(15, 23, 42, 0.15);
+    --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.12);
+    --shadow-xl: 0 16px 48px rgba(15, 23, 42, 0.14);
+    --shadow-2xl: 0 24px 64px rgba(15, 23, 42, 0.16);
 
     /* 색상 그림자 (포인트용) */
-    --shadow-teal: 0 4px 16px rgba(6, 182, 212, 0.25);
-    --shadow-gold: 0 4px 16px rgba(212, 175, 55, 0.25);
+    --shadow-teal: 0 4px 16px rgba(15, 173, 176, 0.25);
+    --shadow-gold: 0 4px 16px rgba(207, 166, 74, 0.25);
 
     /* ========== 전환 효과 ========== */
     --transition-fast: 0.15s ease;
@@ -150,11 +154,16 @@
     --z-toast: 700;
 
     /* ========== 한국 전통 패턴 (미세하게) ========== */
-    /* 얇은 한지 질감 (거의 보이지 않음) */
+    /* 얇은 한지 질감 (거의 보이지 않음, 선택적으로 사용) */
     --texture-paper: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" /></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.02"/></svg>');
 
-    /* 전통 패턴 (로고 배경용) */
-    --pattern-traditional: linear-gradient(135deg, var(--primary-teal) 0%, var(--primary-light) 100%);
+    /* 전통 패턴 (로고/히어로 배경용 그라데이션) */
+    --pattern-traditional: linear-gradient(
+            135deg,
+            #0fadb0 0%,    /* 청록 */
+            #255e91 45%,   /* 단청 청색 */
+            #cfa64a 100%   /* 전통 금색 */
+    );
 }
 
 /* ========== 폰트 확대 모드 (접근성) ========== */
@@ -182,33 +191,34 @@ body.font-xl {
     --font-5xl: 4rem;                /* 64px */
 }
 
-/* ========== 다크모드 (선택적) ========== */
+/* ========== 다크모드 (선택적, 시스템 설정 기반) ========== */
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-main: #0f172a;
-        --bg-card: #1e293b;
-        --bg-overlay: #1a1f2e;
-        --bg-section: #1e293b;
-        --bg-hover: #334155;
+        --bg-main: #020617;          /* 거의 먹색 배경 */
+        --bg-card: #0b1220;          /* 짙은 남색 카드 */
+        --bg-overlay: #020617;
+        --bg-section: #020617;
+        --bg-hover: #111827;
 
-        --text-primary: #f8fafc;
-        --text-secondary: #cbd5e1;
-        --text-tertiary: #94a3b8;
+        --text-primary: #f9fafb;
+        --text-secondary: #e5e7eb;
+        --text-tertiary: #9ca3af;
 
-        --border-light: #334155;
-        --border-medium: #475569;
-        --border-dark: #64748b;
+        --border-light: #1f2937;
+        --border-medium: #374151;
+        --border-dark: #4b5563;
 
-        /* 다크모드에서도 틸은 선명하게 */
-        --primary-teal: #22d3ee;
-        --primary-light: #67e8f9;
+        /* 다크모드에서도 청록/골드는 조금 더 밝게 */
+        --primary-teal: #22c7c9;
+        --primary-light: #5eead4;
+        --accent-gold: #facc6b;
     }
 }
 
 /* ========== 반응형 브레이크포인트 참고 ========== */
 /*
-모바일: @media (max-width: 640px) { }
-태블릿: @media (min-width: 641px) and (max-width: 1024px) { }
+모바일:  @media (max-width: 640px) { }
+태블릿:  @media (min-width: 641px) and (max-width: 1024px) { }
 데스크톱: @media (min-width: 1025px) { }
-와이드: @media (min-width: 1440px) { }
+와이드:  @media (min-width: 1440px) { }
 */
