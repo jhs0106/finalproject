@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">Mun'cok CCTV Preview</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <style>
+        :root {
+            font-family: 'Noto Sans KR', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #f6f6f6;
+            background: #050505;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 16px 48px;
+        }
+        h1 {
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        p {
+            margin: 0 0 24px;
+            color: #bdbdbd;
+        }
+        video {
+            width: min(960px, 100%);
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 24px;
+            border: 2px solid rgba(255,255,255,0.15);
+            box-shadow: 0 20px 80px rgba(0,0,0,0.65);
+        }
+        .status {
+            margin-top: 16px;
+            color: #9ee37d;
+            font-size: 0.95rem;
+        }
+        .status.error {
+            color: #ff6b6b;
+        }
+        button {
+            margin-top: 24px;
+            background: #1e1e1e;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #f5f5f5;
+            border-radius: 999px;
+            padding: 12px 28px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        button:hover {
+            background: #2e2e2e;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+<h1>Mun'cok CCTV</h1>
+<p>브라우저에 연결된 카메라를 WebRTC로 미리보기 합니다.</p>
+<video id="preview" autoplay playsinline muted></video>
+<div id="status" class="status">카메라 준비 중...</div>
+<button id="retry" type="button" hidden>다시 연결</button>
+<script>
+    const statusEl = document.getElementById('status');
+    const videoEl = document.getElementById('preview');
+    const retryBtn = document.getElementById('retry');
+
+    async function startPreview() {
+        retryBtn.hidden = true;
+        statusEl.textContent = '카메라 준비 중...';
+        statusEl.classList.remove('error');
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            videoEl.srcObject = stream;
+            statusEl.textContent = '카메라가 연결되었습니다.';
+        } catch (err) {
+            statusEl.textContent = '카메라 장치에 접근할 수 없습니다. 권한을 확인해주세요.';
+            statusEl.classList.add('error');
+            retryBtn.hidden = false;
+            console.error('camera error', err);
+        }
+    }
+
+    retryBtn.addEventListener('click', startPreview);
+    startPreview();
+</script>
+</body>
+</html>
