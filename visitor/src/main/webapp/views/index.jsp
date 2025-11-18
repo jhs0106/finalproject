@@ -130,7 +130,7 @@
         </div>
     </div>
 </footer>
-<!-- Epidemic Info Modal -->
+<!-- 보건정보 알리미 Modal -->
 <div class="modal fade" id="epidemicModal" tabindex="-1"
      role="dialog" aria-labelledby="epidemicModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
@@ -138,7 +138,7 @@
 
             <!-- 제목 -->
             <div class="modal-header">
-                <h5 class="modal-title" id="epidemicModalLabel">전염병 알림 및 안내</h5>
+                <h5 class="modal-title" id="epidemicModalLabel">보건정보 알리미</h5>
             </div>
 
             <!-- 본문 -->
