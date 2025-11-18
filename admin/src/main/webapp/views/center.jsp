@@ -265,365 +265,28 @@
         </div>
         <div class="col-lg-4 col-md-12 mb-20">
           <div class="card-box height-100-p pd-20 min-height-200px">
-            <%--							차트나 표 들어갈 자리--%>
-            차트나 표 추가 커스텀
+            <div class="h5 mb-0">시설 상태</div>
+              <div id="chart5"></div>
           </div>
         </div>
       </div>
 
-      <div class="card-box pb-10">
-        <div class="h5 pd-20 mb-0">Recent Patient</div>
-        <table class="data-table table nowrap">
-          <thead>
-          <tr>
-            <th class="table-plus">Name</th>
-            <th>Gender</th>
-            <th>Weight</th>
-            <th>Assigned Doctor</th>
-            <th>Admit Date</th>
-            <th>Disease</th>
-            <th class="datatable-nosort">Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-            <td class="table-plus">
-              <div class="name-avatar d-flex align-items-center">
-                <div class="avatar mr-2 flex-shrink-0">
-                  <img
-                          src="vendors/images/photo4.jpg"
-                          class="border-radius-100 shadow"
-                          width="40"
-                          height="40"
-                          alt=""
-                  />
-                </div>
-                <div class="txt">
-                  <div class="weight-600">Jennifer O. Oster</div>
-                </div>
-              </div>
-            </td>
-            <td>Female</td>
-            <td>45 kg</td>
-            <td>Dr. Callie Reed</td>
-            <td>19 Oct 2020</td>
-            <td>
-									<span
-                                            class="badge badge-pill"
-                                            data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7"
-                                    >Typhoid</span
-                                    >
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="#" data-color="#265ed7"
-                ><i class="icon-copy dw dw-edit2"></i
-                ></a>
-                <a href="#" data-color="#e95959"
-                ><i class="icon-copy dw dw-delete-3"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="table-plus">
-              <div class="name-avatar d-flex align-items-center">
-                <div class="avatar mr-2 flex-shrink-0">
-                  <img
-                          src="vendors/images/photo5.jpg"
-                          class="border-radius-100 shadow"
-                          width="40"
-                          height="40"
-                          alt=""
-                  />
-                </div>
-                <div class="txt">
-                  <div class="weight-600">Doris L. Larson</div>
-                </div>
-              </div>
-            </td>
-            <td>Male</td>
-            <td>76 kg</td>
-            <td>Dr. Ren Delan</td>
-            <td>22 Jul 2020</td>
-            <td>
-									<span
-                                            class="badge badge-pill"
-                                            data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7"
-                                    >Dengue</span
-                                    >
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="#" data-color="#265ed7"
-                ><i class="icon-copy dw dw-edit2"></i
-                ></a>
-                <a href="#" data-color="#e95959"
-                ><i class="icon-copy dw dw-delete-3"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="table-plus">
-              <div class="name-avatar d-flex align-items-center">
-                <div class="avatar mr-2 flex-shrink-0">
-                  <img
-                          src="vendors/images/photo6.jpg"
-                          class="border-radius-100 shadow"
-                          width="40"
-                          height="40"
-                          alt=""
-                  />
-                </div>
-                <div class="txt">
-                  <div class="weight-600">Joseph Powell</div>
-                </div>
-              </div>
-            </td>
-            <td>Male</td>
-            <td>90 kg</td>
-            <td>Dr. Allen Hannagan</td>
-            <td>15 Nov 2020</td>
-            <td>
-									<span
-                                            class="badge badge-pill"
-                                            data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7"
-                                    >Infection</span
-                                    >
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="#" data-color="#265ed7"
-                ><i class="icon-copy dw dw-edit2"></i
-                ></a>
-                <a href="#" data-color="#e95959"
-                ><i class="icon-copy dw dw-delete-3"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="table-plus">
-              <div class="name-avatar d-flex align-items-center">
-                <div class="avatar mr-2 flex-shrink-0">
-                  <img
-                          src="vendors/images/photo9.jpg"
-                          class="border-radius-100 shadow"
-                          width="40"
-                          height="40"
-                          alt=""
-                  />
-                </div>
-                <div class="txt">
-                  <div class="weight-600">Jake Springer</div>
-                </div>
-              </div>
-            </td>
-            <td>Female</td>
-            <td>45 kg</td>
-            <td>Dr. Garrett Kincy</td>
-            <td>08 Oct 2020</td>
-            <td>
-									<span
-                                            class="badge badge-pill"
-                                            data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7"
-                                    >Covid 19</span
-                                    >
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="#" data-color="#265ed7"
-                ><i class="icon-copy dw dw-edit2"></i
-                ></a>
-                <a href="#" data-color="#e95959"
-                ><i class="icon-copy dw dw-delete-3"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="table-plus">
-              <div class="name-avatar d-flex align-items-center">
-                <div class="avatar mr-2 flex-shrink-0">
-                  <img
-                          src="vendors/images/photo1.jpg"
-                          class="border-radius-100 shadow"
-                          width="40"
-                          height="40"
-                          alt=""
-                  />
-                </div>
-                <div class="txt">
-                  <div class="weight-600">Paul Buckland</div>
-                </div>
-              </div>
-            </td>
-            <td>Male</td>
-            <td>76 kg</td>
-            <td>Dr. Maxwell Soltes</td>
-            <td>12 Dec 2020</td>
-            <td>
-									<span
-                                            class="badge badge-pill"
-                                            data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7"
-                                    >Asthma</span
-                                    >
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="#" data-color="#265ed7"
-                ><i class="icon-copy dw dw-edit2"></i
-                ></a>
-                <a href="#" data-color="#e95959"
-                ><i class="icon-copy dw dw-delete-3"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="table-plus">
-              <div class="name-avatar d-flex align-items-center">
-                <div class="avatar mr-2 flex-shrink-0">
-                  <img
-                          src="vendors/images/photo2.jpg"
-                          class="border-radius-100 shadow"
-                          width="40"
-                          height="40"
-                          alt=""
-                  />
-                </div>
-                <div class="txt">
-                  <div class="weight-600">Neil Arnold</div>
-                </div>
-              </div>
-            </td>
-            <td>Male</td>
-            <td>60 kg</td>
-            <td>Dr. Sebastian Tandon</td>
-            <td>30 Oct 2020</td>
-            <td>
-									<span
-                                            class="badge badge-pill"
-                                            data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7"
-                                    >Diabetes</span
-                                    >
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="#" data-color="#265ed7"
-                ><i class="icon-copy dw dw-edit2"></i
-                ></a>
-                <a href="#" data-color="#e95959"
-                ><i class="icon-copy dw dw-delete-3"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="table-plus">
-              <div class="name-avatar d-flex align-items-center">
-                <div class="avatar mr-2 flex-shrink-0">
-                  <img
-                          src="vendors/images/photo8.jpg"
-                          class="border-radius-100 shadow"
-                          width="40"
-                          height="40"
-                          alt=""
-                  />
-                </div>
-                <div class="txt">
-                  <div class="weight-600">Christian Dyer</div>
-                </div>
-              </div>
-            </td>
-            <td>Male</td>
-            <td>80 kg</td>
-            <td>Dr. Sebastian Tandon</td>
-            <td>15 Jun 2020</td>
-            <td>
-									<span
-                                            class="badge badge-pill"
-                                            data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7"
-                                    >Diabetes</span
-                                    >
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="#" data-color="#265ed7"
-                ><i class="icon-copy dw dw-edit2"></i
-                ></a>
-                <a href="#" data-color="#e95959"
-                ><i class="icon-copy dw dw-delete-3"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="table-plus">
-              <div class="name-avatar d-flex align-items-center">
-                <div class="avatar mr-2 flex-shrink-0">
-                  <img
-                          src="vendors/images/photo1.jpg"
-                          class="border-radius-100 shadow"
-                          width="40"
-                          height="40"
-                          alt=""
-                  />
-                </div>
-                <div class="txt">
-                  <div class="weight-600">Doris L. Larson</div>
-                </div>
-              </div>
-            </td>
-            <td>Male</td>
-            <td>76 kg</td>
-            <td>Dr. Ren Delan</td>
-            <td>22 Jul 2020</td>
-            <td>
-									<span
-                                            class="badge badge-pill"
-                                            data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7"
-                                    >Dengue</span
-                                    >
-            </td>
-            <td>
-              <div class="table-actions">
-                <a href="#" data-color="#265ed7"
-                ><i class="icon-copy dw dw-edit2"></i
-                ></a>
-                <a href="#" data-color="#e95959"
-                ><i class="icon-copy dw dw-delete-3"></i
-                ></a>
-              </div>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+
 
       <div class="title pb-20 pt-20">
-        <h2 class="h3 mb-0">Quick Start</h2>
+        <h2 class="h3 mb-0">지금 바로 시작하세요.</h2>
       </div>
 
       <div class="row">
         <div class="col-md-4 mb-20">
           <a href="#" class="card-box d-block mx-auto pd-20 text-secondary">
             <div class="img pb-30">
-              <img src="vendors/images/medicine-bro.svg" alt="" />
+              <img src="vendors/images/datalog.jpg" alt="" />
             </div>
             <div class="content">
-              <h3 class="h4">Services</h3>
+              <h3 class="h4">데이터 로그 확인</h3>
               <p class="max-width-200">
-                We provide superior health care in a compassionate maner
+                시설에 대한 모든 데이터 로그를 확인합니다.
               </p>
             </div>
           </a>
@@ -631,12 +294,12 @@
         <div class="col-md-4 mb-20">
           <a href="#" class="card-box d-block mx-auto pd-20 text-secondary">
             <div class="img pb-30">
-              <img src="vendors/images/remedy-amico.svg" alt="" />
+              <img src="vendors/images/iot.jpg"  alt="" />
             </div>
             <div class="content">
-              <h3 class="h4">Medications</h3>
+              <h3 class="h4">시설 장비 조작</h3>
               <p class="max-width-200">
-                Look for prescription and over-the-counter drug information.
+                시설의 장비를 조작하세요.
               </p>
             </div>
           </a>
@@ -644,12 +307,12 @@
         <div class="col-md-4 mb-20">
           <a href="#" class="card-box d-block mx-auto pd-20 text-secondary">
             <div class="img pb-30">
-              <img src="vendors/images/paper-map-cuate.svg" alt="" />
+              <img src="vendors/images/cust.jpg" alt="" />
             </div>
             <div class="content">
-              <h3 class="h4">Locations</h3>
+              <h3 class="h4">고객대응</h3>
               <p class="max-width-200">
-                Convenient locations when and where you need them.
+                실시간으로 고객을 관리하고, 응대하세요.
               </p>
             </div>
           </a>
@@ -662,3 +325,47 @@
     </div>
   </div>
 
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var el = document.querySelector("#chart5");
+    if (!el) return;
+
+    var options = {
+      series: [
+        { name: "매출", type: "column", data: [10, 41, 35, 51, 49, 62, 69] },
+        { name: "방문자", type: "line", data: [23, 42, 35, 27, 43, 22, 17] }
+      ],
+      chart: {
+        height: 350,
+        type: "line"
+      },
+      stroke: {
+        width: [0, 4]
+      },
+      dataLabels: {
+        enabled: true,
+        enabledOnSeries: [1]
+      },
+      labels: ["월", "화", "수", "목", "금", "토", "일"],
+      xaxis: {
+        type: "category"
+      },
+      yaxis: [
+        {
+          title: {
+            text: "매출"
+          }
+        },
+        {
+          opposite: true,
+          title: {
+            text: "방문자"
+          }
+        }
+      ]
+    };
+
+    var chart = new ApexCharts(el, options);
+    chart.render();
+  });
+</script>
