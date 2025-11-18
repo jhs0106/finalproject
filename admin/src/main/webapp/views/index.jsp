@@ -474,6 +474,9 @@
 								<li><a href="form-pickers.html">Form Pickers</a></li>
 								<li><a href="image-cropper.html">Image Cropper</a></li>
 								<li><a href="image-dropzone.html">Image Dropzone</a></li>
+								<li>
+									<a href="<c:url value='/page/cctv'/>">CCTV 모니터링</a>
+								</li>
 							</ul>
 						</li>
 						<br>
