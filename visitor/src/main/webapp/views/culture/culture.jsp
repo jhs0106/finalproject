@@ -69,14 +69,32 @@
             return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         }
 
+        // ✅ 해상도 요청 추가 (모바일/PC 모두)
         function startCamera() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 $('#qrStatus').text('카메라를 사용할 수 없습니다.');
                 return;
             }
 
-            var facing = isMobile() ? 'user' : 'environment';
-            navigator.mediaDevices.getUserMedia({video: {facingMode: facing}})
+            var commonVideoConfig = {
+                width:  { ideal: 1280 },   // 720p 이상 권장
+                height: { ideal: 720 }
+            };
+
+            var constraints;
+            if (isMobile()) {
+                constraints = {
+                    video: Object.assign({}, commonVideoConfig, {
+                        facingMode: { ideal: 'environment' }   // 모바일 후면 카메라 우선
+                    })
+                };
+            } else {
+                constraints = {
+                    video: commonVideoConfig   // PC는 해상도만 지정
+                };
+            }
+
+            navigator.mediaDevices.getUserMedia(constraints)
                 .then(function (stream) {
                     streamRef = stream;
                     var video = document.getElementById('qrVideo');
@@ -99,7 +117,9 @@
         }
 
         function renderGuide(response) {
-            var detail = response && response.guideDetail ? response.guideDetail : '해설을 불러오지 못했습니다.';
+            var detail = response && response.guideDetail
+                ? response.guideDetail
+                : '해설을 불러오지 못했습니다.';
             var tips = response && response.vectorTopics ? response.vectorTopics : [];
 
             $('#guideResult').text(detail);
@@ -112,7 +132,9 @@
         }
 
         function renderComparison(response) {
-            var content = response && response.overview ? response.overview : '비교 결과를 불러오지 못했습니다.';
+            var content = response && response.overview
+                ? response.overview
+                : '비교 결과를 불러오지 못했습니다.';
             $('#compareResult').text(content);
         }
 
@@ -173,7 +195,10 @@
                     url: '<c:url value="/api/culture/comparison"/>',
                     method: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({artifactId: baseId, comparisonRegionId: regionId})
+                    data: JSON.stringify({
+                        artifactId: baseId,
+                        comparisonRegionId: regionId
+                    })
                 }).done(function (data) {
                     renderComparison(data);
                 }).fail(function () {
@@ -187,12 +212,13 @@
 <div class="culture-hero">
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
         <div>
-            <div class="text-uppercase mb-2" style="font-weight:700;letter-spacing:1px;opacity:0.8;">AI 문화 해설</div>
+            <div class="text-uppercase mb-2"
+                 style="font-weight:700;letter-spacing:1px;opacity:0.8;">AI 문화 해설</div>
             <h2 class="mb-2">QR 스캔 + RAG 해설 + 음성 안내</h2>
             <p class="mb-0">전시 앞에서 QR을 스캔하고, AI가 전시물의 배경과 주변 시대 정보를 빠르게 전달합니다.</p>
         </div>
         <div class="mt-3 mt-md-0">
-            <span class="badge badge-light text-dark">Front Camera on Mobile</span>
+            <span class="badge badge-light text-dark">모바일 후면 카메라 사용</span>
         </div>
     </div>
 </div>
@@ -206,12 +232,18 @@
             </div>
             <p id="qrStatus" class="text-muted mb-2">카메라를 준비하는 중입니다.</p>
             <div class="form-group mb-2">
-                <label for="artifactId" class="font-weight-bold mb-1">전시물 ID (QR로 읽은 코드 입력 가능)</label>
+                <label for="artifactId" class="font-weight-bold mb-1">
+                    전시물 ID (QR로 읽은 코드 입력 가능)
+                </label>
                 <input type="text" id="artifactId" class="form-control" placeholder="예: goryeo_celadon"/>
             </div>
             <div class="d-flex gap-2">
-                <button type="button" id="loadGuide" class="btn btn-primary mr-2">AI 해설 가져오기</button>
-                <button type="button" id="stopCamera" class="btn btn-outline-secondary">카메라 중지</button>
+                <button type="button" id="loadGuide" class="btn btn-primary mr-2">
+                    AI 해설 가져오기
+                </button>
+                <button type="button" id="stopCamera" class="btn btn-outline-secondary">
+                    카메라 중지
+                </button>
             </div>
         </div>
     </div>
@@ -247,7 +279,9 @@
             </div>
         </div>
         <div class="col-md-4 d-flex align-items-end">
-            <button type="button" id="loadCompare" class="btn btn-success btn-block">비교 결과 보기</button>
+            <button type="button" id="loadCompare" class="btn btn-success btn-block">
+                비교 결과 보기
+            </button>
         </div>
     </div>
     <div id="compareResult" class="result-box"></div>
