@@ -462,6 +462,7 @@
 		</div>
 <%--left var start--%>
 		<div class="left-side-bar">
+			<br>
 			<div class="brand-logo">
 				<a href="/">
 					<img src="/vendors/images/MunCokLogo.jpg"
@@ -475,6 +476,7 @@
 			<div class="menu-block customscroll">
 				<div class="sidebar-menu">
 					<ul id="accordion-menu">
+						<hr>
 						<li class="dropdown">
 							<a href="javascript:;" class="dropdown-toggle">
 								<span class="micon bi bi-house"></span
