@@ -319,8 +319,8 @@
         </div>
       </div>
 
-      <div class="footer-wrap pd-20 mb-20 card-box">
-        Footer
+      <div class="footer-wrap pd-20 mb-20 card-box" style="background-color: #eae7e7">
+        © 2025 AI Culture Guide. All rights reserved.
       </div>
     </div>
   </div>
