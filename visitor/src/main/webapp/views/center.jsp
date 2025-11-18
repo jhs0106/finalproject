@@ -178,13 +178,13 @@
                 </p>
             </div>
 
-            <!-- 전염병 알리미 카드 -->
+            <!-- 보건정보 알리미 카드 -->
             <div class="service-card epidemic-card" data-toggle="modal" data-target="#epidemicModal">
                 <div class="service-icon">
-                    <i class="fas fa-virus"></i>
+                    <i class="fas fa-info-circle"></i>
                 </div>
 
-                <h3 class="service-title">전염병 알리미</h3>
+                <h3 class="service-title">보건정보 알리미</h3>
 
                 <p class="service-desc">
                     질병관리청 · 지자체 공지 기반 전염병 위험도 및 예방 수칙을 제공합니다.
