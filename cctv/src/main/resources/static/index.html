@@ -5,8 +5,9 @@
     <title th:text="${pageTitle}">Mun'cok CCTV Preview</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
         :root {
-            font-family: 'Noto Sans KR', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Pretendard Variable', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Nanum Gothic', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color: #f6f6f6;
             background: #050505;
         }
@@ -27,6 +28,52 @@
             margin: 0 0 24px;
             color: #bdbdbd;
         }
+        .analysis-panel {
+            width: min(960px, 100%);
+            background: rgba(17, 20, 31, 0.95);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+        }
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        .badge {
+            border-radius: 999px;
+            padding: 6px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .badge.waiting { background: rgba(255,255,255,0.15); color: #f5f5f5; }
+        .badge.processing { background: rgba(255,255,255,0.25); color: #f5f5f5; }
+        .badge.safe { background: rgba(62, 201, 144, 0.2); color: #9bf3d3; }
+        .badge.alert { background: rgba(255, 94, 94, 0.25); color: #ffb4b4; }
+        .badge.error { background: rgba(255, 190, 92, 0.25); color: #ffd9a6; }
+        .analysis-log {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .analysis-log .log-entry {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+        }
+        .analysis-log .log-entry.success { color: #aef3d4; }
+        .analysis-log .log-entry.danger { color: #ff9898; }
+        .analysis-log .log-entry.warning { color: #ffd59e; }
+        .analysis-log .placeholder { color: rgba(255,255,255,0.55); }
         video {
             width: min(960px, 100%);
             aspect-ratio: 16 / 9;
@@ -62,7 +109,16 @@
 </head>
 <body>
 <h1>Mun'cok CCTV</h1>
-<p>브라우저에 연결된 카메라를 WebRTC로 미리보기 합니다.</p>
+<div class="analysis-panel">
+    <div class="analysis-header">
+        <h2>AI 재난 감지</h2>
+        <span id="analysis-badge" class="badge waiting">대기 중</span>
+    </div>
+    <p id="analysis-copy">30초마다 CCTV 프레임을 추출하여 화재, 지진, 인명 사고 등의 징후를 분석합니다.</p>
+    <div id="analysis-log" class="analysis-log">
+        <p class="placeholder">아직 분석 결과가 없습니다.</p>
+    </div>
+</div>
 <video id="preview" autoplay playsinline muted></video>
 <div id="status" class="status">카메라 준비 중...</div>
 <button id="retry" type="button" hidden>다시 연결</button>
@@ -70,6 +126,76 @@
     const statusEl = document.getElementById('status');
     const videoEl = document.getElementById('preview');
     const retryBtn = document.getElementById('retry');
+    const badgeEl = document.getElementById('analysis-badge');
+    const analysisCopyEl = document.getElementById('analysis-copy');
+    const analysisLogEl = document.getElementById('analysis-log');
+
+    const ANALYSIS_INTERVAL_MS = 30000;
+    const ANALYSIS_PROMPT = "현재 CCTV 화면에서 관측되는 상황을 2문장 이내로 설명하고, 화재·지진·붕괴·인명사고 등 재난 징후가 있으면 반드시 EmergencyCallTool.call119 도구를 호출하세요. 재난이 없다면 NO_DISASTER_DETECTED만 응답하세요.";
+
+    const queryParams = new URLSearchParams(window.location.search);
+    const encodedEndpoint = queryParams.get('analysisEndpoint');
+    const encodedParentOrigin = queryParams.get('parentOrigin');
+
+    const parentOrigin = (() => {
+        if (encodedParentOrigin) {
+            try {
+                return decodeURIComponent(encodedParentOrigin);
+            } catch (err) {
+                console.warn('parentOrigin decode error', err);
+            }
+        }
+        try {
+            return document.referrer ? new URL(document.referrer).origin : null;
+        } catch (err) {
+            return null;
+        }
+    })();
+
+    // AI 분석 서버(Admin)의 주소를 직접 지정 (HTTPS 및 8444 포트 필수)
+    const ANALYSIS_ENDPOINT = "https://localhost:8444/cctv/api/analysis";
+
+    const overlayUI = {
+        updateBadge(state, text) {
+            badgeEl.className = `badge ${state}`;
+            badgeEl.textContent = text;
+        },
+        updateCopy(text) {
+            analysisCopyEl.textContent = text;
+        },
+        pushLog(text, tone = 'neutral') {
+            if (analysisLogEl.querySelector('.placeholder')) {
+                analysisLogEl.innerHTML = '';
+            }
+            const entry = document.createElement('p');
+            entry.className = `log-entry ${tone}`;
+            entry.textContent = `[${new Date().toLocaleTimeString('ko-KR', { hour12: false })}] ${text}`;
+            analysisLogEl.prepend(entry);
+            while (analysisLogEl.children.length > 4) {
+                analysisLogEl.removeChild(analysisLogEl.lastElementChild);
+            }
+        }
+    };
+
+    const broadcaster = (payload) => {
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'CCTV_ANALYSIS_RESULT', payload }, parentOrigin || '*');
+        }
+    };
+
+    const extractLastLine = (text) => {
+        if (!text) {
+            return '';
+        }
+        const lines = text
+            .split('\n')
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
+        return lines.length ? lines[lines.length - 1] : '';
+    };
+
+    let analysisTimer = null;
+    let isAnalyzing = false;
 
     async function startPreview() {
         retryBtn.hidden = true;
@@ -78,14 +204,98 @@
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             videoEl.srcObject = stream;
-            statusEl.textContent = '카메라가 연결되었습니다.';
+            statusEl.textContent = 'cctv 작동중';
+            if (!isAnalyzing) {
+                isAnalyzing = true;
+                startAnalysisLoop();
+            }
         } catch (err) {
-            statusEl.textContent = '카메라 장치에 접근할 수 없습니다. 권한을 확인해주세요.';
+            statusEl.textContent = 'cctv에 접근할 수 없습니다.';
             statusEl.classList.add('error');
             retryBtn.hidden = false;
             console.error('camera error', err);
         }
     }
+
+    const captureFrame = () => {
+        return new Promise((resolve) => {
+            if (!videoEl || videoEl.videoWidth === 0 || videoEl.videoHeight === 0) {
+                resolve(null);
+                return;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = videoEl.videoWidth;
+            canvas.height = videoEl.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => resolve(blob), 'image/png');
+        });
+    };
+
+    const runAnalysis = async () => {
+        const frame = await captureFrame();
+        if (!frame) {
+            console.warn('캡처 가능한 프레임이 없습니다. 다음 주기를 기다립니다.');
+            return;
+        }
+
+        overlayUI.updateBadge('processing', '분석 중');
+        overlayUI.updateCopy('AI가 최신 CCTV 프레임을 분석하고 있습니다...');
+
+        const formData = new FormData();
+        formData.append('question', ANALYSIS_PROMPT);
+        formData.append('attach', frame, 'frame.png');
+
+        const timestamp = new Date().toISOString();
+
+        try {
+            const response = await fetch(ANALYSIS_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/x-ndjson, text/plain;q=0.9, */*;q=0.8'
+                },
+                body: formData,
+                mode: 'cors',
+                credentials: 'omit'
+            });
+
+            if (!response.ok) {
+                throw new Error(`AI 서버 응답 오류 (${response.status})`);
+            }
+
+            const rawText = (await response.text()).trim();
+            const resultText = extractLastLine(rawText);
+
+            if (resultText === 'NO_DISASTER_DETECTED' || resultText.length === 0) {
+                overlayUI.updateBadge('safe', '안전');
+                overlayUI.updateCopy('최근 분석 기준 이상 징후가 감지되지 않았습니다. 30초 후 재분석합니다.');
+                overlayUI.pushLog('AI 분석 결과 이상 징후 없음', 'success');
+                broadcaster({ severity: 'normal', message: 'AI 분석 결과 이상 없음', timestamp });
+            } else {
+                overlayUI.updateBadge('alert', '위험 감지');
+                overlayUI.updateCopy('AI가 재난 징후를 감지하여 즉시 신고를 접수했습니다.');
+                overlayUI.pushLog(resultText, 'danger');
+                broadcaster({ severity: 'alert', message: resultText, timestamp });
+            }
+        } catch (error) {
+            console.error('분석 실패', error);
+            overlayUI.updateBadge('error', '분석 실패');
+            const friendlyMessage = error.message?.includes('Failed to fetch')
+                ? 'AI 분석 서버에 연결할 수 없습니다.'
+                : error.message;
+            overlayUI.updateCopy(friendlyMessage);
+            overlayUI.pushLog(friendlyMessage, 'warning');
+            broadcaster({ severity: 'error', message: friendlyMessage, timestamp });
+        }
+    };
+
+    const startAnalysisLoop = () => {
+        const trigger = async () => {
+            await runAnalysis();
+        };
+        trigger();
+        analysisTimer = setInterval(trigger, ANALYSIS_INTERVAL_MS);
+    };
 
     retryBtn.addEventListener('click', startPreview);
     startPreview();
