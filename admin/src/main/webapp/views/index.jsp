@@ -491,6 +491,19 @@
 							</ul>
 						</li>
 						<br>
+						<li class="dropdown">
+							<a href="javascript:;" class="dropdown-toggle">
+								<span class="micon bi bi-table"></span
+								><span class="mtext">시설별 파일 적재</span>
+							</a>
+							<ul class="submenu">
+								<li><a href="<c:url value="/page/page1"/>">page1</a></li>
+								<li><a href="<c:url value="/page/culture-ingest"/>">문화 데이터 적재</a></li>
+								<li><a href="index2.html">Dashboard style 2</a></li>
+								<li><a href="index3.html">Dashboard style 3</a></li>
+							</ul>
+						</li>
+						<br>
 						<li>
 							<a href="calendar.html" class="dropdown-toggle no-arrow">
 								<span class="micon bi bi-calendar4-week"></span
@@ -498,6 +511,7 @@
 							</a>
 						</li>
 						<br>
+
 						<li class="dropdown">
 							<a href="javascript:;" class="dropdown-toggle">
 								<span class="micon bi bi-archive"></span
@@ -531,7 +545,7 @@
 						<li>
 							<div class="sidebar-small-cap"></div>
 						</li>
-
+					</ul>
 				</div>
 			</div>
 		</div>
