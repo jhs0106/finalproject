@@ -5,6 +5,7 @@ import edu.sm.app.springai.CultureIngestionService;
 import edu.sm.app.springai.CultureVectorAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,9 +50,21 @@ public class CultureContentController {
 
     @DeleteMapping("/vectors")
     public ResponseEntity<Map<String, Object>> deleteByFacility(
-            @RequestParam("facilityId") String facilityId
+            @RequestParam(value = "facilityId", required = false) String facilityId
     ) {
-        int deleted = vectorAdminService.deleteByFacility(facilityId);
-        return ResponseEntity.ok(Map.of("deleted", deleted, "facilityId", facilityId));
+        if (StringUtils.hasText(facilityId)) {
+            int deleted = vectorAdminService.deleteByFacility(facilityId);
+            return ResponseEntity.ok(Map.of(
+                    "deleted", deleted,
+                    "facilityId", facilityId,
+                    "scope", "facility"
+            ));
+        }
+
+        int deleted = vectorAdminService.deleteAll();
+        return ResponseEntity.ok(Map.of(
+                "deleted", deleted,
+                "scope", "all"
+        ));
     }
 }

@@ -58,6 +58,11 @@ public class CultureVectorAdminService {
         vectorStore.delete(ids);
         return ids.size();
     }
+    public int deleteAll() {
+        Integer count = jdbcTemplate.queryForObject("select count(*) from vector_store", Integer.class);
+        jdbcTemplate.update("TRUNCATE TABLE vector_store");
+        return count != null ? count : 0;
+    }
 
     public record VectorRow(String id, String facilityId, String filename, String contentPreview, Map<String, Object> metadata) {
     }

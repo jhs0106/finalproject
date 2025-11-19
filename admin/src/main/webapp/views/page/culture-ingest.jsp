@@ -105,17 +105,20 @@
       // 한 시설의 전체 벡터 문서 삭제
       deleteFacilityButton.addEventListener('click', async function () {
         const facilityId = facilityInput.value.trim();
-        if (!facilityId) {
-          alert('시설 ID를 입력해주세요.');
-          facilityInput.focus();
-          return;
-        }
-        if (!confirm('시설 ' + facilityId + '의 벡터 문서를 모두 삭제할까요?')) {
+        const deletingAll = !facilityId;
+
+        const message = deletingAll
+                ? '전체 시설의 벡터 문서를 모두 삭제할까요?'
+                : '시설 ' + facilityId + '의 벡터 문서를 모두 삭제할까요?';
+        if (!confirm(message)) {
           return;
         }
         try {
           const baseUrl = '<c:url value="/api/culture/vectors"/>';
-          const res = await fetch(baseUrl + '?facilityId=' + encodeURIComponent(facilityId), {
+          const targetUrl = deletingAll
+                  ? baseUrl
+                  : baseUrl + '?facilityId=' + encodeURIComponent(facilityId);
+          const res = await fetch(targetUrl, {
             method: 'DELETE'
           });
           if (!res.ok) {
@@ -123,8 +126,13 @@
             throw new Error(msg || '삭제 중 오류 발생');
           }
           const data = await res.json();
-          lastResult.textContent =
-                  '시설 ' + data.facilityId + ' 문서 ' + data.deleted + '건 삭제 완료';
+          if (deletingAll) {
+            lastResult.textContent = '전체 문서 ' + data.deleted + '건 삭제 완료';
+          } else {
+            lastResult.textContent =
+                    '시설 ' + data.facilityId + ' 문서 ' + data.deleted + '건 삭제 완료';
+          }
+          facilityInput.value = '';
           await loadVectors();
         } catch (e) {
           alert('삭제 실패: ' + e.message);
@@ -273,7 +281,8 @@
       </div>
       <p class="text-muted small mb-3">
         시설 ID를 입력한 뒤 새로고침하면 해당 시설의 벡터 문서를 조회하고,
-        각 문서 또는 한 시설의 모든 벡터 문서를 삭제할 수 있습니다.
+        각 문서 또는 한 시설의 모든 벡터 문서를 삭제할 수 있습니다. 시설 ID를 비워둔 채
+        <strong>전체 삭제</strong>를 누르면 벡터스토어 전체가 초기화됩니다.
       </p>
       <div class="table-responsive">
         <table class="table table-striped">
