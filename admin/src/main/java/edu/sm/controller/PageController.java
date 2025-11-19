@@ -33,4 +33,11 @@ public class PageController {
         return "index";
     }
 
+    @RequestMapping("/culture-ingest")
+    public String cultureIngest(Model model) {
+        model.addAttribute("center", dir+"culture-ingest");
+        return "index";
+    }
+
+
 }
