@@ -64,12 +64,13 @@
 <script>
     (function ($) {
         var streamRef = null;
+        var cameraOn = false; // ✅ 카메라 상태 플래그
 
         function isMobile() {
             return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
         }
 
-        // ✅ 해상도 요청 추가 (모바일/PC 모두)
+        // ✅ 해상도 요청 + 모바일 후면 카메라 우선
         function startCamera() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 $('#qrStatus').text('카메라를 사용할 수 없습니다.');
@@ -102,10 +103,20 @@
                         video.srcObject = stream;
                         video.play();
                     }
+                    cameraOn = true;
                     $('#qrStatus').text('카메라가 준비되었습니다.');
+                    $('#toggleCamera')
+                        .text('카메라 중지')
+                        .removeClass('btn-outline-secondary')
+                        .addClass('btn-outline-danger');
                 })
                 .catch(function () {
                     $('#qrStatus').text('카메라 접근에 실패했습니다.');
+                    cameraOn = false;
+                    $('#toggleCamera')
+                        .text('카메라 켜기')
+                        .removeClass('btn-outline-danger')
+                        .addClass('btn-outline-secondary');
                 });
         }
 
@@ -114,6 +125,12 @@
                 streamRef.getTracks().forEach(function (track) { track.stop(); });
                 streamRef = null;
             }
+            cameraOn = false;
+            $('#qrStatus').text('카메라를 중지했습니다.');
+            $('#toggleCamera')
+                .text('카메라 켜기')
+                .removeClass('btn-outline-danger')
+                .addClass('btn-outline-secondary');
         }
 
         function renderGuide(response) {
@@ -150,11 +167,19 @@
         }
 
         $(function () {
+            // 처음 로딩 시 자동으로 카메라 켬
             startCamera();
 
-            $('#stopCamera').on('click', function () {
-                stopCamera();
-                $('#qrStatus').text('카메라를 중지했습니다.');
+            // ✅ 토글 버튼: 중지 ↔ 켜기
+            $('#toggleCamera').on('click', function () {
+                if (cameraOn) {
+                    // 현재 켜져 있으면 중지
+                    stopCamera();
+                } else {
+                    // 꺼져 있으면 다시 켜기
+                    $('#qrStatus').text('카메라를 준비하는 중입니다.');
+                    startCamera();
+                }
             });
 
             $('#loadGuide').on('click', function () {
@@ -241,7 +266,8 @@
                 <button type="button" id="loadGuide" class="btn btn-primary mr-2">
                     AI 해설 가져오기
                 </button>
-                <button type="button" id="stopCamera" class="btn btn-outline-secondary">
+                <!-- ✅ 토글 버튼으로 변경 -->
+                <button type="button" id="toggleCamera" class="btn btn-outline-danger">
                     카메라 중지
                 </button>
             </div>
