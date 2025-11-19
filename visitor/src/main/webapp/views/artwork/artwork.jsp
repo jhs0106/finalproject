@@ -98,47 +98,42 @@
             vertical-align: middle;
         }
 
-        /* ★ 여기에서는 width/height를 캔버스 내부 해상도랑 안 어긋나게 최소한만 지정 */
         #sketch-canvas {
             border: 1px solid #ccc;
             border-radius: 8px;
             background: #ffffff;
             display: block;
-            width: 100%;   /* 화면 폭에 맞추되 */
-            /* height는 JS에서 고정값(예: 300)으로 설정 -> CSS로는 지정 X */
+            width: 100%;
         }
 
         .sketch-footer {
             margin-top: 10px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             gap: 8px;
-        }
-
-        .sketch-footer-left {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-        }
-
-        .sketch-footer-right {
-            display: flex;
-            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary, #999);
         }
 
         .preview-image-box {
             margin-top: 12px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
         }
 
+        /* 각 이미지 블록(스케치 / 합성) 공통 스타일 */
+        .preview-image-box .image-block {
+            margin-bottom: 20px;
+        }
+
+        /* 실제 이미지가 좌우로 꽉 차게 */
         .preview-image-box img {
-            max-width: 260px;
+            display: block;
+            width: 100%;        /* 가로 꽉 채우기 */
+            max-width: 100%;
+            height: auto;
             border-radius: 8px;
             border: 1px solid #ccc;
+            background: #ffffff;
         }
     </style>
 </head>
@@ -185,12 +180,11 @@
         <div class="sketch-container">
             <h5 class="mb-2">3. 직접 스케치해서 작품에 섞어볼까요?</h5>
             <p style="font-size:13px; margin-bottom:10px;">
-                간단하게 선을 그려서 오늘의 작품에 당신의 손길을 더해보세요. 선택하면 이 스케치가 함께 전송됩니다.
+                간단한 낙서를 남겨주세요. 이 스케치는 항상 작품 이미지에 함께 반영됩니다.
             </p>
 
             <!-- 툴바 -->
             <div class="sketch-toolbar">
-
                 <!-- 색상 선택 -->
                 <span style="font-size:13px;">색상:</span>
                 <button type="button" class="color-btn active" data-color="#000000">
@@ -223,12 +217,9 @@
             <!-- 스케치 캔버스 -->
             <canvas id="sketch-canvas"></canvas>
 
-            <!-- 체크박스 -->
+            <!-- 안내 문구 -->
             <div class="sketch-footer">
-                <div class="sketch-footer-left">
-                    <input type="checkbox" id="use-sketch">
-                    <label for="use-sketch">이 스케치를 작품에 함께 보내기</label>
-                </div>
+                이 스케치는 자동으로 작품 이미지에 합성됩니다.
             </div>
         </div>
     </section>
@@ -291,18 +282,15 @@
         if (canvasInitialized) return;
 
         const rect = canvas.getBoundingClientRect();
-        if (rect.width === 0) return; // 아직 안 보이면 스킵
+        if (rect.width === 0) return;
 
-        canvas.width = rect.width; // 내부 해상도 = 실제 폭
-        canvas.height = 300;       // 고정 높이
+        canvas.width = rect.width;
+        canvas.height = 300;
 
-        // 흰 배경으로 한번 채워두기 (다크모드에서도 잘 보이게)
         fillWhiteBackground();
-
         canvasInitialized = true;
     }
 
-    // 캔버스를 흰색으로 채우는 헬퍼 (배경 고정용)
     function fillWhiteBackground() {
         ctx.save();
         ctx.globalCompositeOperation = 'source-over';
@@ -317,7 +305,7 @@
     let currentColor = '#000000';
     let currentSize = 3;
     let isEraser = false;
-    let lastSketchPreview = null; // generate 후 미리보기에서 사용
+    let lastSketchPreview = null;
 
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
@@ -333,7 +321,6 @@
 
         ctx.globalCompositeOperation = 'source-over';
 
-        // 지우개일 때는 투명으로 지우지 말고 "흰색"으로 칠해서 지우기
         if (isEraser) {
             ctx.strokeStyle = '#ffffff';
         } else {
@@ -355,9 +342,8 @@
         drawing = false;
     }
 
-    // 마우스 이벤트 (offsetX/offsetY 사용)
     canvas.addEventListener('mousedown', (e) => {
-        initCanvasSize(); // 혹시 아직 초기화 안 됐으면 여기서도 한 번 보장
+        initCanvasSize();
         startDraw(e.offsetX, e.offsetY);
     });
 
@@ -368,7 +354,6 @@
     canvas.addEventListener('mouseup', endDraw);
     canvas.addEventListener('mouseleave', endDraw);
 
-    // 터치 이벤트
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
         initCanvasSize();
@@ -422,12 +407,12 @@
         }
     });
 
-    // 전체 지우기 (투명 클리어 대신 흰 배경으로 다시 채우기)
+    // 전체 지우기
     document.getElementById('clear-btn').addEventListener('click', () => {
         fillWhiteBackground();
     });
 
-    // 시설 선택 시 스케치 섹션 열고 캔버스 크기 초기화
+    // 시설 선택 시 스케치 영역 오픈
     function selectFacility(el) {
         document.querySelectorAll('.facility-card')
             .forEach(c => c.classList.remove('selected'));
@@ -440,9 +425,8 @@
 
         document.getElementById('step3').classList.remove('d-none');
         document.getElementById('generate-btn').classList.remove('d-none');
-        document.getElementById('step-sketch').classList.remove('d-none'); // 스케치 영역도 함께 오픈
+        document.getElementById('step-sketch').classList.remove('d-none');
 
-        // 이 시점에 실제 폭이 정해졌으니 한번만 캔버스 해상도 맞추기
         initCanvasSize();
     }
 
@@ -461,10 +445,8 @@
             '<div>AI가 작품을 스케치하는 중입니다...<br>' +
             '<small>빛과 온도를 섞어 공간을 형상화하는 중...</small></div>';
 
-        // 스케치 사용 여부와 base64 추출
         let sketchBase64 = null;
-        const useSketch = document.getElementById('use-sketch')?.checked;
-        if (useSketch && canvasInitialized) {
+        if (canvasInitialized) {
             sketchBase64 = canvas.toDataURL('image/png');
             lastSketchPreview = sketchBase64;
         } else {
@@ -477,7 +459,7 @@
             body: JSON.stringify({
                 emotion: selectedEmotion,
                 facility: selectedFacility,
-                sketchBase64: sketchBase64   // 새 필드
+                sketchBase64: sketchBase64
             })
         })
             .then(res => {
@@ -487,13 +469,14 @@
                 }
                 return res.json();
             })
+
             .then(data => {
                 console.log('[artwork] response json =', data);
 
                 const artworkDescription = data.artworkDescription || '(작품 설명 없음)';
                 const curatorComment    = data.curatorComment || '(큐레이터 코멘트 없음)';
                 const exhibitionNote    = data.exhibitionNote || '(전시 노트 없음)';
-                const serverImageBase64 = data.imageBase64; // 서버에서 채워줄 수 있는 이미지 base64
+                const serverImageBase64 = data.imageBase64;
 
                 let html = '';
                 html += '<h5>작품 설명</h5>';
@@ -505,28 +488,45 @@
                 html += '<h5>전시 작가 노트</h5>';
                 html += '<p>' + exhibitionNote + '</p>';
 
-                // 이미지 미리보기 영역
                 html += '<div class="preview-image-box">';
 
+                // 1) 내가 그린 스케치 (상단, 가로 꽉 차게 + 다운로드)
                 if (lastSketchPreview) {
-                    html += '<div>';
-                    html += '<div style="font-weight:bold; margin-bottom:4px;">내가 그린 스케치</div>';
-                    html += '<img src="' + lastSketchPreview + '" alt="사용자 스케치">';
+                    const sketchSrc = lastSketchPreview;  // 이미 data:image/... 형태
+                    const sketchFileName = 'sketch-' + Date.now() + '.png';
+
+                    html += '<div class="image-block">';
+                    html += '  <div class="d-flex justify-content-between align-items-center mb-2">';
+                    html += '    <span style="font-weight:bold;">내가 그린 스케치</span>';
+                    html += '    <a href="' + sketchSrc + '" download="' + sketchFileName + '"';
+                    html += '       class="btn btn-sm btn-outline-secondary">Download</a>';
+                    html += '  </div>';
+                    html += '  <img src="' + sketchSrc + '" alt="사용자 스케치">';
                     html += '</div>';
                 }
 
+                // 2) AI가 완성한 이미지 (하단, 가로 꽉 차게 + 다운로드)
                 if (serverImageBase64) {
-                    html += '<div>';
-                    html += '<div style="font-weight:bold; margin-bottom:4px;">AI가 완성한 이미지</div>';
-                    html += '<img src="data:image/png;base64,' + serverImageBase64 + '" alt="AI 작품 이미지">';
+                    const aiSrc = 'data:image/png;base64,' + serverImageBase64;
+                    const aiFileName = 'ai-art-' + Date.now() + '.png';
+
+                    html += '<div class="image-block">';
+                    html += '  <div class="d-flex justify-content-between align-items-center mb-2">';
+                    html += '    <span style="font-weight:bold;">AI가 완성한 이미지</span>';
+                    html += '    <a href="' + aiSrc + '" download="' + aiFileName + '"';
+                    html += '       class="btn btn-sm btn-outline-secondary">Download</a>';
+                    html += '  </div>';
+                    html += '  <img src="' + aiSrc + '" alt="AI 작품 이미지">';
                     html += '</div>';
                 }
 
-                html += '</div>';
+                html += '</div>'; // .preview-image-box 끝
 
                 previewBox.innerHTML = html;
             })
-            .catch(err => {
+
+
+                .catch(err => {
                 console.error('[artwork] fetch or render error:', err);
                 previewBox.innerHTML =
                     '<p style="color:red;">클라이언트에서 응답 처리 중 오류가 발생했습니다.</p>';

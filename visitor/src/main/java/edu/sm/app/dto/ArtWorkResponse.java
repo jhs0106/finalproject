@@ -7,5 +7,5 @@ public class ArtWorkResponse {
     private String artworkDescription;  // AI 작품 설명
     private String curatorComment;      // 큐레이터 멘트
     private String exhibitionNote;      // 작가의 전시 노트
-    private String imageBase64;         // (옵션) 이미지 생성 시 base64
+    private String imageBase64;         // 합성된 최종 이미지 (PNG, prefix 없이 base64)
 }
