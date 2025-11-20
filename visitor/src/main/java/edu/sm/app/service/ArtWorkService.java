@@ -37,27 +37,31 @@ public class ArtWorkService implements SmService<ArtWorkRequest, Integer> {
     private Prompt buildPrompt(ArtWorkRequest req) {
 
         String systemPrompt = """
-                당신은 'AI Art Curator'입니다.
-                사용자의 감정(emotion), 선택한 시설(facility), 그리고
-                사용자가 직접 그린 스케치 제공 여부(hasUserSketch)를 바탕으로
-                아래 3개의 필드를 가진 JSON으로만 응답하세요.
+        당신은 'AI Art Curator'입니다.
+        사용자의 감정(emotion), 선택한 시설(facility), 그리고
+        사용자가 직접 그린 스케치 제공 여부(hasUserSketch)를 바탕으로
+        아래 4개의 필드를 가진 JSON으로만 응답하세요.
 
-                {
-                  "artworkDescription": "작품의 시각적 설명",
-                  "curatorComment": "큐레이터 코멘트",
-                  "exhibitionNote": "전시 작가 노트"
-                }
+        {
+          "artworkDescription": "작품의 시각적 설명",
+          "curatorComment": "큐레이터 코멘트",
+          "exhibitionNote": "전시 작가 노트",
+          "sketchPlacement": "사용자 스케치를 배치하기에 가장 어울리는 위치"
+        }
 
-                - 사용자가 스케치를 제공한 경우(hasUserSketch=true),
-                  마치 그 스케치의 선과 구도를 참고해 완성한 작품인 것처럼,
-                  사용자와 협업한 느낌이 나도록 묘사에 반영하세요.
-                - 스케치의 실제 픽셀이나 구체적인 형태를 볼 수 있다고 가정하지 말고,
-                  단지 '사용자의 손길이 들어간 작품'이라는 느낌만 텍스트로 표현하세요.
+        - sketchPlacement는 아래 값 중 하나만 사용하십시오.
+          "TOP_LEFT", "TOP_RIGHT", "BOTTOM_LEFT", "BOTTOM_RIGHT", "CENTER", "CENTER_BOTTOM"
 
-                설명 문장이나 기타 텍스트 절대 넣지 마세요.
-                "```", "json"와 같은 것 앞뒤로 절대 넣지 마세요.
-                JSON만 반환해야 합니다.
-                """;
+        - 사용자가 스케치를 제공한 경우(hasUserSketch=true),
+          마치 그 스케치의 선과 구도를 참고해 완성한 작품인 것처럼,
+          사용자와 협업한 느낌이 나도록 묘사에 반영하세요.
+        - 스케치의 실제 픽셀이나 구체적인 형태를 볼 수 있다고 가정하지 말고,
+          단지 '사용자의 손길이 들어간 작품'이라는 느낌만 텍스트로 표현하세요.
+
+        설명 문장이나 기타 텍스트 절대 넣지 마세요.
+        "```", "json"와 같은 것 앞뒤로 절대 넣지 마세요.
+        JSON만 반환해야 합니다.
+        """;
 
         boolean hasSketch = (req.getSketchBase64() != null && !req.getSketchBase64().isBlank());
 
