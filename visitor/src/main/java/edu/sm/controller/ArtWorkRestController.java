@@ -20,12 +20,12 @@ public class ArtWorkRestController {
     public ResponseEntity<ArtWorkResponse> generate(@RequestBody ArtWorkRequest req) {
 
         // 1) 프론트에서 날아온 원본 요청 로그
-        log.info("[ArtWorkRestController] /api/artwork/generate 요청 body = {}", req);
+//        log.info("[ArtWorkRestController] /api/artwork/generate 요청 body = {}", req);
 
         ArtWorkResponse res = service.generateArtwork(req);
 
         // 2) 최종 클라이언트로 나가는 응답 로그
-        log.info("[ArtWorkRestController] /api/artwork/generate 응답 = {}", res);
+//        log.info("[ArtWorkRestController] /api/artwork/generate 응답 = {}", res);
 
         return ResponseEntity.ok(res);
     }

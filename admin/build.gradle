@@ -64,9 +64,9 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-advisors-vector-store'
 	implementation 'org.springframework.ai:spring-ai-rag'
 
-	// Mybatis & MySQL Driver
+	// Mybatis & postgresql Driver
 	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
-	runtimeOnly 'com.mysql:mysql-connector-j'
+	runtimeOnly 'org.postgresql:postgresql'
 
 	// JSON
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
