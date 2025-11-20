@@ -541,11 +541,11 @@
 				<br>
 				<li class="dropdown">
 					<a href="javascript:;" class="dropdown-toggle">
-								<span class="micon bi bi-archive"></span
-								><span class="mtext">고객 대응</span>
+								 <span class="micon bi bi-archive"></span
+								 ><span class="mtext">고객 대응</span>
 					</a>
 					<ul class="submenu">
-						<li><a href="ui-buttons.html">Buttons</a></li>
+						<li><a href="<c:url value='/support'/>">상담사 현황</a></li>
 						<li><a href="ui-cards.html">Cards</a></li>
 						<li><a href="ui-cards-hover.html">Cards Hover</a></li>
 						<li><a href="ui-modals.html">Modals</a></li>
