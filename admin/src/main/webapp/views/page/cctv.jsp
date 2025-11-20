@@ -25,7 +25,7 @@
         <div class="col-lg-12">
           <div class="ai-analysis-card">
             <div class="ai-analysis-header">
-              <h5 class="mb-1">AI 재난 감지 상태</h5>
+              <h5 class="mb-1 ai-title">AI 재난 감지 상태</h5>
               <span id="global-status" class="status waiting">연결 대기 중...</span>
             </div>
             <ul id="ai-analysis-history" class="ai-analysis-history placeholder">
@@ -49,18 +49,25 @@
 </div>
 
 <style>
-  /* AI 분석 카드 스타일 */
   .ai-analysis-card {
     background: #101322; border-radius: 20px; padding: 24px; color: #f7f9ff;
     box-shadow: 0 20px 45px rgba(10, 12, 24, 0.45); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 20px;
   }
   .ai-analysis-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 15px; }
+
+  /* [핵심 수정] 제목 글자색 밝게 + 그림자 효과로 가독성 업 */
+  .ai-title {
+    color: #00ffd5 !important; /* 밝은 형광 민트색 */
+    font-weight: 800;
+    text-shadow: 0 0 10px rgba(0, 255, 213, 0.3);
+    letter-spacing: 0.5px;
+  }
+
   .ai-analysis-history { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .ai-analysis-history.placeholder { color: rgba(255,255,255,0.5); }
   .ai-analysis-history li { background: rgba(255,255,255,0.08); border-radius: 14px; padding: 8px 14px; font-size: 0.85rem; display: flex; gap: 10px; }
   .ai-analysis-history li .time { font-weight: 600; color: rgba(255,255,255,0.9); }
 
-  /* 상태 배지 */
   .status { font-size: 0.9rem; padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,0.08); font-weight: 600; color: #fff; }
   .status.waiting { background: rgba(255,255,255,0.12); }
   .status.safe { background: rgba(62, 201, 144, 0.2); color: #85f0c0; }
@@ -69,14 +76,12 @@
   .text-danger { color: #ff9494 !important; }
   .text-success { color: #85f0c0 !important; }
 
-  /* CCTV 카드 스타일 */
   .cctv-col { margin-bottom: 30px; }
   .cctv-card {
     background: #000; border-radius: 12px; overflow: hidden; position: relative;
     border: 2px solid #444; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     aspect-ratio: 16 / 9;
   }
-  /* [수정] object-fit: contain으로 변경하여 비율 유지 (찌그러짐 방지) */
   .cctv-card video { width: 100%; height: 100%; object-fit: contain; }
 
   .cctv-label {
@@ -103,7 +108,6 @@
     var socket;
     var connections = new Map();
 
-    // [복구] 로그 추가 함수
     function addHistory(timeText, summary, accentClass, cctvId) {
       if (historyEl.classList.contains('placeholder')) {
         historyEl.innerHTML = '';
@@ -112,14 +116,12 @@
       var item = document.createElement('li');
 
       var sourceLabel = cctvId ? '[' + cctvId + '] ' : '';
-      // JSP 충돌 방지를 위해 + 연산자 사용
       var content = '<span class="time">' + timeText + '</span>';
       content += '<span class="' + (accentClass || '') + '">' + sourceLabel + summary + '</span>';
 
       item.innerHTML = content;
       historyEl.prepend(item);
 
-      // 로그가 너무 많으면 삭제
       if (historyEl.children.length > 7) {
         historyEl.removeChild(historyEl.lastElementChild);
       }
@@ -138,7 +140,6 @@
         try {
           var msg = JSON.parse(event.data);
 
-          // [복구] AI 분석 결과 처리
           if (msg.type === 'CCTV_ANALYSIS_RESULT') {
             handleAnalysisResult(msg.payload);
             return;
@@ -209,19 +210,18 @@
       });
     }
 
-    // [복구] 분석 결과 처리 로직
     function handleAnalysisResult(payload) {
       var time = new Date().toLocaleTimeString('ko-KR', { hour12: false });
       var severity = payload.severity || 'info';
       var message = payload.message || '내용 없음';
       var cctvId = payload.cctvId || 'Unknown';
 
+      // 구체적인 메시지를 화면에 표시
       if (severity === 'alert') {
         addHistory(time, message, 'text-danger', cctvId);
-        globalStatusEl.textContent = "위험 감지 (" + cctvId + ")";
+        globalStatusEl.textContent = "위험! " + message; // 상태바에도 내용 표시
         globalStatusEl.className = "status alert";
       } else {
-        // 정상이면 로그에는 표시하되 상단 상태는 safe로 유지
         addHistory(time, '이상 없음', 'text-success', cctvId);
       }
     }
