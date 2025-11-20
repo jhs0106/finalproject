@@ -37,6 +37,7 @@ dependencies {
 
     // admin/build.gradle에서 가져옴
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.3'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 tasks.named('test') {
