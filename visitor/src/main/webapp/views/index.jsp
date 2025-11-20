@@ -70,6 +70,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="<c:url value='/culture'/>">문화 해설</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="<c:url value='/support'/>">고객센터</a>
+                </li>
             </ul>
 
             <div class="header-actions">
