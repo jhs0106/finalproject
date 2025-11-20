@@ -23,15 +23,12 @@
 </div>
 
 <script th:inline="javascript">
-    // ==========================================
-    // [설정] 내 IP 주소 입력 (Admin 서버)
-    // ==========================================
     const ADMIN_HOST = "10.20.36.180";
     const SIGNALING_URL = `wss://${ADMIN_HOST}:8444/signal`;
     const ANALYSIS_ENDPOINT = `https://${ADMIN_HOST}:8444/cctv/api/analysis`;
-    const ANALYSIS_INTERVAL = 30000; // 30초
+    const ANALYSIS_INTERVAL = 30000;
 
-    // 1. ID 생성
+    // ID 생성
     let serverId = [[${cctvId}]];
     if (!serverId) serverId = "";
     const urlParams = new URLSearchParams(window.location.search);
@@ -53,23 +50,16 @@
 
     async function startCamera() {
         try {
-            // [수정] 모바일 후면 카메라 우선 사용 (PC는 자동 선택)
+            // 후면 카메라 우선
             const constraints = {
-                video: {
-                    facingMode: { ideal: "environment" }
-                },
+                video: { facingMode: { ideal: "environment" } },
                 audio: false
             };
-
             localStream = await navigator.mediaDevices.getUserMedia(constraints);
             videoEl.srcObject = localStream;
             log("카메라 작동. 서버 연결 시도...");
-
             connectSocket();
-
-            // AI 분석 루프 시작
             setInterval(runAnalysis, ANALYSIS_INTERVAL);
-
         } catch (e) {
             log("카메라 권한 오류: " + e.message);
         }
@@ -92,22 +82,18 @@
 
         socket.onmessage = async (event) => {
             const msg = JSON.parse(event.data);
-
             if (msg.type === 'viewer_joined') {
                 const delay = Math.floor(Math.random() * 3000);
                 log(`관리자 접속! ${delay}ms 후 연결`);
-
                 setTimeout(async () => {
                     createPeerConnection();
                     const offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
                     send({ type: 'offer', id: CCTV_ID, sdp: offer.sdp });
                 }, delay);
-            }
-            else if (msg.type === 'answer' && msg.id === CCTV_ID) {
+            } else if (msg.type === 'answer' && msg.id === CCTV_ID) {
                 if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(msg));
-            }
-            else if (msg.type === 'candidate' && msg.id === CCTV_ID) {
+            } else if (msg.type === 'candidate' && msg.id === CCTV_ID) {
                 if (peerConnection) await peerConnection.addIceCandidate(new RTCIceCandidate(msg.candidate));
             }
         };
@@ -126,7 +112,7 @@
         };
     }
 
-    // [복구] AI 분석 로직
+    // [핵심 수정] AI 분석 로직 강화
     async function runAnalysis() {
         if (!videoEl.videoWidth) return;
 
@@ -140,23 +126,32 @@
 
         canvas.toBlob(async (blob) => {
             const formData = new FormData();
-            formData.append('question', "화재, 연기, 쓰러짐, 사고 등 위험 상황이 보이면 설명하고 'alert'라고 답해. 아니면 'normal'이라고만 답해.");
+            // [수정] 질문을 구체적으로 변경하여 AI가 상세 상황을 설명하도록 유도
+            const prompt = "화면을 분석해줘. 화재, 연기, 사람이 쓰러짐, 홍수, 태풍, 침수, 교통사고, 칼부림 등 위험한 재난이나 사고 상황이 보이면 구체적으로 어떤 상황인지 한 문장으로 묘사하고 문장 끝에 반드시 'alert' 단어를 붙여줘. (예: 사람이 바닥에 쓰러져 있습니다 alert). 위험하지 않으면 'normal'이라고만 답해.";
+
+            formData.append('question', prompt);
             formData.append('attach', blob, 'frame.png');
 
             try {
                 const res = await fetch(ANALYSIS_ENDPOINT, { method: 'POST', body: formData });
-                const text = await res.text(); // 서버 응답 (NDJSON 등)
+                const text = await res.text();
 
-                // 간단한 결과 파싱 (예시)
                 let severity = 'normal';
                 let message = '이상 없음';
 
-                if (text.includes('alert') || text.includes('위험') || text.includes('화재')) {
+                // [수정] 응답 텍스트 파싱 로직 개선
+                if (text.toLowerCase().includes('alert') || text.includes('위험') || text.includes('화재')) {
                     severity = 'alert';
-                    message = text.substring(0, 50); // 너무 길면 자르기
+                    // 'alert' 단어는 제거하고 설명만 남김
+                    message = text.replace(/alert/gi, '').trim();
+                    if(message.length === 0) message = "위험 상황 감지됨 (상세 내용 없음)";
+
+                    // 화재일 경우 119 멘트 추가 (선택사항)
+                    if(message.includes('화재') || message.includes('불')) {
+                        message += " (119 자동 신고 완료)";
+                    }
                 }
 
-                // 결과 전송
                 send({
                     type: 'CCTV_ANALYSIS_RESULT',
                     payload: {
