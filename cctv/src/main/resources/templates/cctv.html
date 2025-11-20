@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mun'cok CCTV</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <style>
+        body { background: #000; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; }
+        video { width: 100%; max-width: 640px; border-radius: 10px; border: 2px solid #333; }
+        .info { margin-top: 10px; text-align: center; }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; background: #333; }
+        .badge.on { background: #28a745; color: white; }
+        .badge.processing { background: #ffc107; color: #000; }
+    </style>
+</head>
+<body>
+<h2 id="title">CCTV 초기화 중...</h2>
+<video id="preview" autoplay playsinline muted></video>
+<div class="info">
+    <span id="status" class="badge">연결 대기</span>
+    <span id="ai-status" class="badge">AI 준비</span>
+    <p id="log" style="font-size: 0.8rem; color: #aaa;">...</p>
+</div>
+
+<script th:inline="javascript">
+    // ==========================================
+    // [설정] 내 IP 주소 입력 (Admin 서버)
+    // ==========================================
+    const ADMIN_HOST = "10.20.36.180";
+    const SIGNALING_URL = `wss://${ADMIN_HOST}:8444/signal`;
+    const ANALYSIS_ENDPOINT = `https://${ADMIN_HOST}:8444/cctv/api/analysis`;
+    const ANALYSIS_INTERVAL = 30000; // 30초
+
+    // 1. ID 생성
+    let serverId = [[${cctvId}]];
+    if (!serverId) serverId = "";
+    const urlParams = new URLSearchParams(window.location.search);
+    const CCTV_ID = serverId || urlParams.get('id') || 'cctv-' + Math.floor(Math.random() * 1000);
+
+    document.getElementById('title').textContent = `📷 CCTV: ${CCTV_ID}`;
+    document.title = `CCTV - ${CCTV_ID}`;
+
+    const videoEl = document.getElementById('preview');
+    const statusEl = document.getElementById('status');
+    const aiStatusEl = document.getElementById('ai-status');
+    const logEl = document.getElementById('log');
+
+    let socket;
+    let peerConnection;
+    let localStream;
+
+    function log(msg) { logEl.textContent = msg; console.log(msg); }
+
+    async function startCamera() {
+        try {
+            // [수정] 모바일 후면 카메라 우선 사용 (PC는 자동 선택)
+            const constraints = {
+                video: {
+                    facingMode: { ideal: "environment" }
+                },
+                audio: false
+            };
+
+            localStream = await navigator.mediaDevices.getUserMedia(constraints);
+            videoEl.srcObject = localStream;
+            log("카메라 작동. 서버 연결 시도...");
+
+            connectSocket();
+
+            // AI 분석 루프 시작
+            setInterval(runAnalysis, ANALYSIS_INTERVAL);
+
+        } catch (e) {
+            log("카메라 권한 오류: " + e.message);
+        }
+    }
+
+    function connectSocket() {
+        socket = new WebSocket(SIGNALING_URL);
+
+        socket.onopen = () => {
+            statusEl.className = "badge on";
+            statusEl.textContent = "서버 연결됨";
+            log("대기 중...");
+        };
+
+        socket.onclose = () => {
+            statusEl.className = "badge";
+            statusEl.textContent = "연결 끊김";
+            setTimeout(connectSocket, 3000);
+        };
+
+        socket.onmessage = async (event) => {
+            const msg = JSON.parse(event.data);
+
+            if (msg.type === 'viewer_joined') {
+                const delay = Math.floor(Math.random() * 3000);
+                log(`관리자 접속! ${delay}ms 후 연결`);
+
+                setTimeout(async () => {
+                    createPeerConnection();
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    send({ type: 'offer', id: CCTV_ID, sdp: offer.sdp });
+                }, delay);
+            }
+            else if (msg.type === 'answer' && msg.id === CCTV_ID) {
+                if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(msg));
+            }
+            else if (msg.type === 'candidate' && msg.id === CCTV_ID) {
+                if (peerConnection) await peerConnection.addIceCandidate(new RTCIceCandidate(msg.candidate));
+            }
+        };
+    }
+
+    function send(data) {
+        if(socket && socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(data));
+    }
+
+    function createPeerConnection() {
+        if (peerConnection) peerConnection.close();
+        peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        peerConnection.onicecandidate = (e) => {
+            if (e.candidate) send({ type: 'candidate', id: CCTV_ID, candidate: e.candidate });
+        };
+    }
+
+    // [복구] AI 분석 로직
+    async function runAnalysis() {
+        if (!videoEl.videoWidth) return;
+
+        aiStatusEl.className = "badge processing";
+        aiStatusEl.textContent = "분석 중...";
+
+        const canvas = document.createElement('canvas');
+        canvas.width = videoEl.videoWidth;
+        canvas.height = videoEl.videoHeight;
+        canvas.getContext('2d').drawImage(videoEl, 0, 0);
+
+        canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append('question', "화재, 연기, 쓰러짐, 사고 등 위험 상황이 보이면 설명하고 'alert'라고 답해. 아니면 'normal'이라고만 답해.");
+            formData.append('attach', blob, 'frame.png');
+
+            try {
+                const res = await fetch(ANALYSIS_ENDPOINT, { method: 'POST', body: formData });
+                const text = await res.text(); // 서버 응답 (NDJSON 등)
+
+                // 간단한 결과 파싱 (예시)
+                let severity = 'normal';
+                let message = '이상 없음';
+
+                if (text.includes('alert') || text.includes('위험') || text.includes('화재')) {
+                    severity = 'alert';
+                    message = text.substring(0, 50); // 너무 길면 자르기
+                }
+
+                // 결과 전송
+                send({
+                    type: 'CCTV_ANALYSIS_RESULT',
+                    payload: {
+                        cctvId: CCTV_ID,
+                        severity: severity,
+                        message: message,
+                        timestamp: new Date().toISOString()
+                    }
+                });
+
+                aiStatusEl.className = "badge on";
+                aiStatusEl.textContent = "분석 완료";
+
+            } catch(e) {
+                console.error(e);
+                aiStatusEl.className = "badge";
+                aiStatusEl.textContent = "분석 실패";
+            }
+        });
+    }
+
+    startCamera();
+</script>
+</body>
+</html>
