@@ -545,7 +545,7 @@
 								 ><span class="mtext">고객 대응</span>
 					</a>
 					<ul class="submenu">
-						<li><a href="<c:url value='/support'/>">상담사 현황</a></li>
+						<li><a href="<c:url value='/page/support'/>">상담사 현황</a></li>
 						<li><a href="ui-cards.html">Cards</a></li>
 						<li><a href="ui-cards-hover.html">Cards Hover</a></li>
 						<li><a href="ui-modals.html">Modals</a></li>

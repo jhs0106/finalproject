@@ -71,10 +71,14 @@ public class SupportChatService {
         }
 
         if (!"BOT".equals(session.getStatus())) {
+            String handoffMessage = "관리자 상담 대기 중입니다. 곧 연결해 드릴게요.";
+            if ("AGENT_CONNECTED".equals(session.getStatus())) {
+                handoffMessage = "상담사가 연결되었습니다. 챗봇과 대화가 종료됩니다.";
+            }
             session.getMessages().add(SupportChatMessage.builder()
                     .sender("bot")
                     .timestamp(now())
-                    .content("관리자 상담 대기 중입니다. 곧 연결해 드릴게요.")
+                    .content(handoffMessage)
                     .build());
             return store.upsert(session);
         }
