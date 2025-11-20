@@ -68,7 +68,9 @@
   const handoffBtn = document.getElementById('handoffBtn');
 
   let sessionId = null;
-
+  let lastMessages = [];
+  let sessionPoller = null;
+  const defaultSendLabel = sendMsgBtn.innerHTML;
   loginState.addEventListener('change', () => {
     if (loginState.value === 'true') {
       userNameInput.value = userNameInput.value || '로그인 이용자';
@@ -98,6 +100,7 @@
     sendMsgBtn.disabled = false;
     chatWindow.innerHTML = '';
     renderMessages(data.messages);
+    startSessionPolling();
   });
 
   sendMsgBtn.addEventListener('click', () => sendMessage(false));
@@ -111,19 +114,49 @@
     const msg = messageInput.value.trim();
     if (!handoff && !msg) return;
 
-    const payload = { message: msg, handoff };
-    const res = await fetch(`<c:url value="/api/support/session"/>/${sessionId}/message`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    sessionStatus.innerText = data.status;
-    renderMessages(data.messages);
-    messageInput.value = '';
+    if (!handoff) {
+      renderMessages([
+        ...lastMessages,
+        {
+          sender: 'visitor',
+          timestamp: new Date().toLocaleString('ko-KR'),
+          content: msg
+        }
+      ], { preserveState: true });
+    } else {
+      renderMessages([
+        ...lastMessages,
+        {
+          sender: 'bot',
+          timestamp: new Date().toLocaleString('ko-KR'),
+          content: '상담사 연결을 요청 중입니다...'
+        }
+      ], { preserveState: true });
+    }
+
+    setSendingState(true);
+
+    try {
+      const payload = { message: msg, handoff };
+      const res = await fetch(`<c:url value="/api/support/session"/>/${sessionId}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      sessionStatus.innerText = data.status;
+      renderMessages(data.messages);
+      handleStatusAfterResponse(data.status);
+      if (!handoff) {
+        messageInput.value = '';
+        messageInput.focus();
+      }
+    } finally {
+      setSendingState(false);
+    }
   }
 
-  function renderMessages(messages) {
+  function renderMessages(messages, options = {}) {
     chatWindow.innerHTML = '';
     messages.forEach(m => {
       const wrapper = document.createElement('div');
@@ -135,5 +168,56 @@
       chatWindow.appendChild(wrapper);
     });
     chatWindow.scrollTop = chatWindow.scrollHeight;
+    if (!options.preserveState) {
+      lastMessages = messages;
+    }
+  }
+
+  function setSendingState(isSending) {
+    if (isSending) {
+      sendMsgBtn.disabled = true;
+      messageInput.readOnly = true;
+      handoffBtn.disabled = true;
+      sendMsgBtn.innerHTML = '<span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>전송 중';
+    } else {
+      const agentConnected = sessionStatus.innerText === 'AGENT_CONNECTED';
+      sendMsgBtn.disabled = agentConnected;
+      messageInput.readOnly = agentConnected;
+      messageInput.disabled = agentConnected;
+      handoffBtn.disabled = agentConnected;
+      sendMsgBtn.innerHTML = defaultSendLabel || '전송';
+    }
+  }
+
+  function handleStatusAfterResponse(status) {
+    if (status === 'AGENT_CONNECTED') {
+      messageInput.disabled = true;
+      sendMsgBtn.disabled = true;
+      handoffBtn.disabled = true;
+      sessionStatus.innerText = 'AGENT_CONNECTED';
+    }
+  }
+
+  function startSessionPolling() {
+    stopSessionPolling();
+    sessionPoller = setInterval(async () => {
+      if (!sessionId) return;
+      try {
+        const res = await fetch(`<c:url value="/api/support/session"/>/${sessionId}`);
+        const data = await res.json();
+        sessionStatus.innerText = data.status;
+        renderMessages(data.messages);
+        handleStatusAfterResponse(data.status);
+      } catch (e) {
+        console.warn('세션 상태를 불러오지 못했습니다.', e);
+      }
+    }, 4000);
+  }
+
+  function stopSessionPolling() {
+    if (sessionPoller) {
+      clearInterval(sessionPoller);
+      sessionPoller = null;
+    }
   }
 </script>

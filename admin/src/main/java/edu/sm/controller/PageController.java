@@ -39,5 +39,11 @@ public class PageController {
         return "index";
     }
 
+    @RequestMapping("/support")
+    public String support(Model model) {
+        model.addAttribute("center", dir + "support");
+        return "index";
+    }
+
 
 }
