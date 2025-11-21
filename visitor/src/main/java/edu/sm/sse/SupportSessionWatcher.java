@@ -2,6 +2,7 @@ package edu.sm.sse;
 
 import edu.sm.app.dto.SupportSession;
 import edu.sm.app.service.SupportChatStore;
+import edu.sm.sse.SupportSseBroadcaster;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,7 +32,8 @@ public class SupportSessionWatcher {
             if (lastModified == null || modifiedTime.compareTo(lastModified) > 0) {
                 lastModified = modifiedTime;
                 List<SupportSession> sessions = store.findAll();
-                sessions.forEach(broadcaster::broadcast);
+                broadcaster.broadcastList(sessions);
+                sessions.forEach(broadcaster::broadcastSession);
             }
         } catch (IOException e) {
             log.debug("지원 세션 파일 감시 중 오류", e);

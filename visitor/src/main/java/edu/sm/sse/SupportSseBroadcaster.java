@@ -17,46 +17,53 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public class SupportSseBroadcaster {
 
-    private final Map<String, List<SseEmitter>> emittersBySession = new ConcurrentHashMap<>();
+    private final List<SseEmitter> listEmitters = new CopyOnWriteArrayList<>();
+    private final Map<String, List<SseEmitter>> sessionEmitters = new ConcurrentHashMap<>();
 
-    public SseEmitter subscribe(String sessionId, SupportSession snapshot) {
+    public SseEmitter subscribeAll(List<SupportSession> snapshot) {
         SseEmitter emitter = new SseEmitter(0L);
-        emittersBySession.computeIfAbsent(sessionId, id -> new CopyOnWriteArrayList<>()).add(emitter);
-
-        emitter.onCompletion(() -> removeEmitter(sessionId, emitter));
-        emitter.onTimeout(() -> removeEmitter(sessionId, emitter));
-        emitter.onError((ex) -> removeEmitter(sessionId, emitter));
-
-        try {
-            emitter.send(SseEmitter.event().name("session").data(snapshot));
-        } catch (IOException e) {
-            log.warn("초기 SSE 전송 실패", e);
-            emitter.complete();
-        }
-
+        listEmitters.add(emitter);
+        wireCleanup(null, emitter);
+        trySend(emitter, "sessions", snapshot);
+        return emitter;
+    }
+    public SseEmitter subscribeSession(String sessionId, SupportSession snapshot) {
+        SseEmitter emitter = new SseEmitter(0L);
+        sessionEmitters.computeIfAbsent(sessionId, id -> new CopyOnWriteArrayList<>()).add(emitter);
+        wireCleanup(sessionId, emitter);
+        trySend(emitter, "session", snapshot);
         return emitter;
     }
 
-    public void broadcast(SupportSession session) {
-        List<SseEmitter> emitters = emittersBySession.get(session.getId());
-        if (emitters == null || emitters.isEmpty()) {
-            return;
-        }
-
-        emitters.forEach(emitter -> {
-            try {
-                emitter.send(SseEmitter.event().name("session").data(session));
-            } catch (IOException e) {
-                log.debug("SSE 전송 실패, 구독자 정리", e);
-                emitter.complete();
-            }
-        });
+    public void broadcastList(List<SupportSession> sessions) {
+        listEmitters.forEach(emitter -> trySend(emitter, "sessions", sessions));
     }
 
-    private void removeEmitter(String sessionId, SseEmitter emitter) {
-        List<SseEmitter> emitters = emittersBySession.get(sessionId);
-        if (emitters != null) {
-            emitters.remove(emitter);
+    public void broadcastSession(SupportSession session) {
+        List<SseEmitter> emitters = sessionEmitters.get(session.getId());
+        if (emitters == null || emitters.isEmpty()) return;
+        emitters.forEach(emitter -> trySend(emitter, "session", session));
+    }
+
+    private void wireCleanup(String sessionId, SseEmitter emitter) {
+        Runnable cleanup = () -> {
+            listEmitters.remove(emitter);
+            if (sessionId != null) {
+                List<SseEmitter> emitters = sessionEmitters.get(sessionId);
+                if (emitters != null) emitters.remove(emitter);
+            }
+        };
+        emitter.onCompletion(cleanup);
+        emitter.onTimeout(cleanup);
+        emitter.onError(ex -> cleanup.run());
+    }
+
+    private void trySend(SseEmitter emitter, String name, Object data) {
+        try {
+            emitter.send(SseEmitter.event().name(name).data(data));
+        } catch (IOException e) {
+            log.debug("SSE 전송 실패 - 정리 진행", e);
+            emitter.complete();
         }
     }
 }

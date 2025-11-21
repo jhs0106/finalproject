@@ -25,7 +25,7 @@ import java.util.UUID;
 @Slf4j
 public class SupportChatService {
 
-    private final ChatClient.Builder chatClientBuilder;
+    private final ChatClient chatClient;
     private final SupportChatStore store;
     private final SupportSseBroadcaster broadcaster;
 
@@ -49,7 +49,7 @@ public class SupportChatService {
                 .build());
 
         SupportSession saved = store.upsert(session);
-        broadcaster.broadcast(saved);
+        broadcastUpdates(saved);
         return saved;
     }
 
@@ -73,7 +73,7 @@ public class SupportChatService {
                     .content("상담사 연결을 요청했습니다. 잠시만 기다려 주세요.")
                     .build());
             SupportSession updated = store.upsert(session);
-            broadcaster.broadcast(updated);
+            broadcastUpdates(updated);
             return updated;
         }
 
@@ -88,7 +88,7 @@ public class SupportChatService {
                     .content(handoffMessage)
                     .build());
             SupportSession updated = store.upsert(session);
-            broadcaster.broadcast(updated);
+            broadcastUpdates(updated);;
             return updated;
         }
 
@@ -99,7 +99,7 @@ public class SupportChatService {
                 .content(botAnswer)
                 .build());
         SupportSession updated = store.upsert(session);
-        broadcaster.broadcast(updated);
+        broadcastUpdates(updated);
         return updated;
     }
 
@@ -109,7 +109,7 @@ public class SupportChatService {
     }
 
     public SseEmitter subscribe(String id, SupportSession snapshot) {
-        return broadcaster.subscribe(id, snapshot);
+        return broadcaster.subscribeSession(id, snapshot);
     }
 
     private boolean containsHandoffKeyword(String message) {
@@ -119,7 +119,6 @@ public class SupportChatService {
     }
 
     private String askBot(List<SupportChatMessage> messages) {
-        ChatClient chatClient = chatClientBuilder.build();
 
         String history = messages.stream()
                 .limit(6)
@@ -153,5 +152,10 @@ public class SupportChatService {
 
     private String now() {
         return FORMATTER.format(Instant.now());
+    }
+
+    private void broadcastUpdates(SupportSession session) {
+        broadcaster.broadcastList(store.findAll());
+        broadcaster.broadcastSession(session);
     }
 }
