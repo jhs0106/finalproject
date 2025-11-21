@@ -69,7 +69,7 @@
 
   let sessionId = null;
   let lastMessages = [];
-  let sessionPoller = null;
+  let sessionSource = null;
   const defaultSendLabel = sendMsgBtn.innerHTML;
   loginState.addEventListener('change', () => {
     if (loginState.value === 'true') {
@@ -100,7 +100,7 @@
     sendMsgBtn.disabled = false;
     chatWindow.innerHTML = '';
     renderMessages(data.messages);
-    startSessionPolling();
+    connectSessionStream();
   });
 
   sendMsgBtn.addEventListener('click', () => sendMessage(false));
@@ -198,26 +198,28 @@
     }
   }
 
-  function startSessionPolling() {
-    stopSessionPolling();
-    sessionPoller = setInterval(async () => {
-      if (!sessionId) return;
+  function connectSessionStream() {
+    if (!sessionId) return;
+    if (sessionSource) {
+      sessionSource.close();
+    }
+
+    sessionSource = new EventSource(`<c:url value="/api/support/session"/>/${sessionId}/stream`);
+    sessionSource.addEventListener('session', (event) => {
       try {
-        const res = await fetch(`<c:url value="/api/support/session"/>/${sessionId}`);
-        const data = await res.json();
+        const data = JSON.parse(event.data);
         sessionStatus.innerText = data.status;
+        sessionUser.innerText = `${data.userName} (${data.loggedIn ? '로그인' : '비로그인'})`;
         renderMessages(data.messages);
         handleStatusAfterResponse(data.status);
       } catch (e) {
-        console.warn('세션 상태를 불러오지 못했습니다.', e);
+        console.warn('세션 이벤트 파싱 실패', e);
       }
-    }, 4000);
-  }
+    });
 
-  function stopSessionPolling() {
-    if (sessionPoller) {
-      clearInterval(sessionPoller);
-      sessionPoller = null;
-    }
+    sessionSource.onerror = () => {
+      console.warn('세션 스트림이 끊어졌습니다. 5초 후 재연결합니다.');
+      setTimeout(connectSessionStream, 5000);
+    };
   }
 </script>
