@@ -64,7 +64,7 @@
             <p class="toolbar-hint">필터를 조정하면 지도와 추천 카드가 동시에 업데이트됩니다.</p>
         </div>
         <div class="map-panel__body">
-            <div class="map-canvas" id="mapCanvas" data-kakao-app-key="cfa3949fa12f1fde8c2bb2ca997d439a">
+            <div class="map-canvas" id="mapCanvas" data-kakao-app-key="eda01cdad108f213dc44773c2b414794">
                 <div class="map-canvas__kakao" id="kakaoMap" aria-label="카카오 지도"></div>
                 <div class="map-api-bridge" data-map-api-bridge aria-live="polite"></div>
                 <div class="map-canvas__badge" id="mapSelectionBadge">경로를 선택해주세요</div>

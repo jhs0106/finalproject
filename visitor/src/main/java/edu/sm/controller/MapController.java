@@ -7,11 +7,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @Slf4j
+@RequestMapping("/map")
 public class MapController {
 
-    @RequestMapping("/map")
-    public String map(Model model) {
-        model.addAttribute("center", "map");
+    String dir = "map/";
+
+    @RequestMapping("")
+    public String main(Model model) {
+        model.addAttribute("center", dir + "map");
         return "index";
     }
 }
