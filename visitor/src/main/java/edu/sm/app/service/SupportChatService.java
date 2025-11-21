@@ -4,6 +4,7 @@ import edu.sm.app.dto.SupportChatMessage;
 import edu.sm.app.dto.SupportMessageRequest;
 import edu.sm.app.dto.SupportSession;
 import edu.sm.app.dto.SupportStartRequest;
+import edu.sm.sse.SupportSseBroadcaster;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -11,6 +12,7 @@ import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -25,6 +27,7 @@ public class SupportChatService {
 
     private final ChatClient.Builder chatClientBuilder;
     private final SupportChatStore store;
+    private final SupportSseBroadcaster broadcaster;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter
             .ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -45,7 +48,9 @@ public class SupportChatService {
                 .content("안녕하세요! 무엇을 도와드릴까요? 전시 안내, 시설 정보, 문화 관련 질문을 자유롭게 남겨주세요.")
                 .build());
 
-        return store.upsert(session);
+        SupportSession saved = store.upsert(session);
+        broadcaster.broadcast(saved);
+        return saved;
     }
 
     public SupportSession handleMessage(String sessionId, SupportMessageRequest request) {
@@ -67,7 +72,9 @@ public class SupportChatService {
                     .timestamp(now())
                     .content("상담사 연결을 요청했습니다. 잠시만 기다려 주세요.")
                     .build());
-            return store.upsert(session);
+            SupportSession updated = store.upsert(session);
+            broadcaster.broadcast(updated);
+            return updated;
         }
 
         if (!"BOT".equals(session.getStatus())) {
@@ -80,7 +87,9 @@ public class SupportChatService {
                     .timestamp(now())
                     .content(handoffMessage)
                     .build());
-            return store.upsert(session);
+            SupportSession updated = store.upsert(session);
+            broadcaster.broadcast(updated);
+            return updated;
         }
 
         String botAnswer = askBot(session.getMessages());
@@ -89,12 +98,18 @@ public class SupportChatService {
                 .timestamp(now())
                 .content(botAnswer)
                 .build());
-        return store.upsert(session);
+        SupportSession updated = store.upsert(session);
+        broadcaster.broadcast(updated);
+        return updated;
     }
 
     public SupportSession getSession(String id) {
         return store.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("상담 세션을 찾을 수 없습니다."));
+    }
+
+    public SseEmitter subscribe(String id, SupportSession snapshot) {
+        return broadcaster.subscribe(id, snapshot);
     }
 
     private boolean containsHandoffKeyword(String message) {

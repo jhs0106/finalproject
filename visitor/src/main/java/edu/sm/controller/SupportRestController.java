@@ -5,8 +5,10 @@ import edu.sm.app.dto.SupportSession;
 import edu.sm.app.dto.SupportStartRequest;
 import edu.sm.app.service.SupportChatService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/api/support")
@@ -31,5 +33,11 @@ public class SupportRestController {
     @GetMapping("/session/{id}")
     public ResponseEntity<SupportSession> get(@PathVariable String id) {
         return ResponseEntity.ok(service.getSession(id));
+    }
+
+    @GetMapping(value = "/session/{id}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter stream(@PathVariable String id) {
+        SupportSession session = service.getSession(id);
+        return service.subscribe(id, session);
     }
 }

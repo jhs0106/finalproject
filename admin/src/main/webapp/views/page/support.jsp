@@ -23,6 +23,8 @@
     const closeBtn      = document.getElementById('closeBtn');
 
     let currentSession = null;
+    let listSource = null;
+    let sessionSource = null;
 
     // API 기본 URL (JSP에서 서버 URL만 주입)
     const SESSION_BASE_URL = '<c:url value="/api/support/session"/>';
@@ -38,12 +40,24 @@
     }
 
     // ===== 세션 목록 조회 =====
-    async function fetchSessions() {
-      const res = await fetch(SESSION_BASE_URL);
-      const data = await res.json();
-      renderSessionList(data);
+    function connectSessionListStream() {
+      if (listSource) {
+        listSource.close();
+      }
+      listSource = new EventSource(SESSION_BASE_URL + '/stream');
+      listSource.addEventListener('sessions', (event) => {
+        try {
+          const sessions = JSON.parse(event.data);
+          renderSessionList(sessions);
+        } catch (e) {
+          console.warn('세션 목록 이벤트 파싱 실패', e);
+        }
+      });
+      listSource.onerror = () => {
+        console.warn('세션 목록 스트림 오류, 5초 후 재연결');
+        setTimeout(connectSessionListStream, 5000);
+      };
     }
-
     // ===== 세션 목록 렌더링 =====
     function renderSessionList(sessions) {
       sessionList.innerHTML = '';
@@ -81,6 +95,27 @@
       const data = await res.json();
 
       currentSession = data;
+
+      if (sessionSource) {
+        sessionSource.close();
+      }
+      sessionSource = new EventSource(SESSION_BASE_URL + '/' + id + '/stream');
+      sessionSource.addEventListener('session', (event) => {
+        try {
+          const session = JSON.parse(event.data);
+          currentSession = session;
+          detailStatus.innerText = session.status;
+          detailStatus.className = 'badge badge-' + statusColor(session.status);
+          detailUser.innerText = session.userName + ' (' + (session.loggedIn ? '로그인' : '비로그인') + ')';
+          renderMessages(session.messages);
+        } catch (e) {
+          console.warn('세션 이벤트 파싱 실패', e);
+        }
+      });
+      sessionSource.onerror = () => {
+        console.warn('세션 스트림 오류, 5초 후 재연결');
+        setTimeout(() => loadSession(id), 5000);
+      };
 
       // 상태/사용자 영역 갱신
       detailStatus.innerText = data.status;
@@ -155,8 +190,7 @@
     });
 
     // ===== 최초 로드 + 주기적 새로고침 =====
-    fetchSessions();
-    setInterval(fetchSessions, 8000);
+      connectSessionListStream();
   });
 </script>
 

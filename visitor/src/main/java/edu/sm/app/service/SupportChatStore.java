@@ -33,7 +33,12 @@ public class SupportChatStore {
         }
         return file;
     }
-
+    /**
+     * 외부 컴포넌트에서 저장소 파일을 감시하거나 즉시 접근할 수 있도록 노출합니다.
+     */
+    public Path storageFile() throws IOException {
+        return getStoragePath();
+    }
     private synchronized List<SupportSession> loadSessions() {
         try {
             Path file = getStoragePath();

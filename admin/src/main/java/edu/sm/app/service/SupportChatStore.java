@@ -33,6 +33,9 @@ public class SupportChatStore {
         }
         return file;
     }
+    public Path storageFile() throws IOException {
+        return getStoragePath();
+    }
 
     private synchronized List<SupportSession> loadSessions() {
         try {
